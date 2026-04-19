@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GR Revenue Intelligence — Live</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#040710;--card:#0C1220;--card2:#111826;--bdr:rgba(255,255,255,0.07);
+  --pu:#7B5FFF;--cy:#00C9A7;--pk:#E8409A;--am:#F59E0B;
+  --rd:#F03E5D;--gn:#22C55E;--bl:#3B82F6;
+  --tx:#ECF0F8;--tx2:#8B95A7;--tx3:#3D4655;
+}
+body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Fira Code',monospace;font-size:13px;min-height:100vh}
+nav{background:rgba(4,7,16,0.98);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:100}
+.nav-top{display:flex;align-items:center;gap:12px;padding:0 16px;height:44px}
+.logo{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,var(--pu),var(--pk));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.live-badge{display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cy)}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--cy);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.btn-ref{background:rgba(123,95,255,0.15);border:1px solid rgba(123,95,255,0.3);color:var(--pu);font-family:monospace;font-size:10px;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .2s}
+.btn-ref:hover{background:rgba(123,95,255,0.3)}
+.btn-ref:disabled{opacity:0.4;cursor:not-allowed}
+.last-upd{font-size:8px;color:var(--tx3)}
+.tabs{display:flex;padding:0 6px;overflow-x:auto;gap:0}
+.tab{display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:1px;padding:7px 9px;border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;color:var(--tx3);font-family:monospace;transition:all .2s}
+.tab.active{border-bottom-color:var(--pu);color:var(--pu)}
+.bdg{background:rgba(240,62,93,0.25);color:var(--rd);font-size:7px;padding:1px 4px;border-radius:4px;margin-left:2px}
+.content{padding:14px 16px;max-width:1400px;margin:0 auto}
+.panel{display:none}
+.panel.active{display:block}
+#overlay{position:fixed;inset:0;background:rgba(4,7,16,0.85);display:none;z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#overlay.show{display:flex}
+.spin{width:36px;height:36px;border:3px solid var(--bdr);border-top-color:var(--pu);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#err{background:rgba(240,62,93,0.12);border:1px solid rgba(240,62,93,0.3);color:var(--rd);font-size:11px;padding:10px 16px;margin:10px 16px;border-radius:8px;display:none;line-height:1.6}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px}
+.csm{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;margin-bottom:6px}
+.gkpi{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.gauto{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px}
+.gcli{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+.kbar{position:absolute;top:0;left:0;right:0;height:2px}
+.kl{font-size:9px;letter-spacing:2px;color:var(--tx3);margin-bottom:5px}
+.kv{font-weight:800;font-size:22px;line-height:1;margin-bottom:2px}
+.ks{font-size:10px;color:var(--tx3)}
+.tag{display:inline-block;font-size:9px;letter-spacing:1px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.sec{font-size:9px;letter-spacing:2px;color:var(--tx3);margin-bottom:10px;text-transform:uppercase}
+.drow{display:flex;gap:8px;padding:8px 11px;border-radius:8px;background:var(--card);border:1px solid var(--bdr);margin-bottom:6px;align-items:center}
+.dn{flex:1;font-size:11px;font-weight:500}
+.sgr{margin-bottom:18px}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.alc{background:var(--card);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.actx{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.04);font-size:11px;color:var(--tx2);line-height:1.7;display:none;border-left-width:3px;border-left-style:solid}
+.actx.open{display:block}
+.ahint{font-size:9px;color:var(--tx3);margin-top:4px}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;letter-spacing:1px;color:var(--tx3);text-align:left;padding:8px 11px;border-bottom:1px solid var(--bdr);background:var(--card2);white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--bdr);font-size:11px}
+tr:nth-child(even) td{background:rgba(255,255,255,0.013)}
+#chat-msgs{height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.msg{max-width:85%;border-radius:10px;padding:10px 14px;font-size:11px;line-height:1.7;white-space:pre-wrap}
+.mu{align-self:flex-end;background:rgba(123,95,255,0.2);border:1px solid rgba(123,95,255,0.4)}
+.ma{align-self:flex-start;background:var(--card);border:1px solid var(--bdr)}
+.mlbl{font-size:9px;color:var(--pu);margin-bottom:4px;letter-spacing:1px}
+.crow{display:flex;gap:10px}
+#cin{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--bdr);color:var(--tx);font-size:12px;font-family:monospace;padding:10px 14px;border-radius:8px;outline:none}
+#cin:focus{border-color:var(--pu)}
+#csend{background:var(--pu);border:none;color:#fff;font-size:12px;padding:10px 18px;border-radius:8px;cursor:pointer;font-family:monospace;font-weight:700}
+#csend:disabled{opacity:0.4;cursor:not-allowed}
+/* PENDIENTES */
+.psidebar{display:flex;gap:0;margin-bottom:16px;background:var(--card2);border:1px solid var(--bdr);border-radius:10px;overflow:hidden}
+.pbtn{padding:8px 14px;font-size:10px;border:none;background:none;cursor:pointer;font-family:monospace;color:var(--tx3);transition:all .2s;white-space:nowrap;border-bottom:2px solid transparent}
+.pbtn.active{color:var(--pu);border-bottom-color:var(--pu);background:rgba(123,95,255,0.08)}
+.pfiltros{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.pfbtn{font-size:9px;padding:4px 10px;border-radius:5px;border:1px solid var(--bdr);background:none;cursor:pointer;font-family:monospace;color:var(--tx3);transition:all .2s}
+.pfbtn.active{background:rgba(123,95,255,0.15);border-color:var(--pu);color:var(--pu)}
+.pfbtn.active2{background:rgba(123,95,255,0.15);border-color:var(--pu);color:var(--pu)}
+.amtab{padding:9px 16px;font-size:10px;border:none;background:none;cursor:pointer;font-family:monospace;color:var(--tx3);transition:all .2s;border-bottom:2px solid transparent;white-space:nowrap}
+.amtab.active{color:var(--pu);border-bottom-color:var(--pu);background:rgba(123,95,255,0.08)}
+#pbuscar{background:rgba(255,255,255,0.04);border:1px solid var(--bdr);color:var(--tx);font-size:11px;font-family:monospace;padding:6px 12px;border-radius:6px;outline:none;margin-left:auto}
+.tarea-row{display:flex;gap:8px;padding:8px 12px;border-radius:7px;background:var(--card);border:1px solid var(--bdr);margin-bottom:5px;align-items:flex-start}
+.tarea-pri{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.tarea-txt{flex:1;font-size:11px;line-height:1.4}
+.tarea-fecha{font-size:9px;white-space:nowrap}
+/* RECAP */
+.recap-stat{text-align:center;padding:14px;background:var(--card);border:1px solid var(--bdr);border-radius:10px}
+.recap-num{font-size:28px;font-weight:800;line-height:1}
+.recap-lbl{font-size:9px;letter-spacing:2px;color:var(--tx3);margin-top:4px}
+.person-card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px}
+.person-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+footer{border-top:1px solid var(--bdr);padding:8px 16px;display:flex;justify-content:space-between;margin-top:14px;font-size:8px;color:var(--tx3)}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}.psidebar{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div id="overlay"><div class="spin"></div><div style="font-size:11px;color:var(--tx2)">Jalando datos de HubSpot...</div></div>
+<div id="err"></div>
+<nav>
+  <div class="nav-top">
+    <div class="logo">G</div>
+    <div><div style="font-weight:700;font-size:12px">GREAT REVENUE</div><div style="font-size:8px;letter-spacing:2px;color:var(--tx3)">Revenue Intelligence — Live</div></div>
+    <div class="nav-right">
+      <div class="last-upd" id="last-upd">Sin cargar</div>
+      <button class="btn-ref" onclick="loadData()" id="btnref">⟳ Actualizar</button>
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('recap',this)">🎉 Recap</button>
+    <button class="tab" onclick="showTab('overview',this)">⚡ Overview</button>
+    <button class="tab" onclick="showTab('pipeline',this)">📊 Pipeline</button>
+    <button class="tab" onclick="showTab('won',this)">🏆 Won</button>
+    <button class="tab" onclick="showTab('clientes',this)">🤝 Clientes</button>
+    <button class="tab" onclick="showTab('pendientes',this)">⏰ Pendientes</button>
+    <button class="tab" onclick="showTab('alertas',this)">🚨 Alertas <span class="bdg">5</span></button>
+    <button class="tab" onclick="showTab('am',this)">📡 AM</button>
+    <button class="tab" onclick="showTab('forecast',this)">📈 Forecast</button>
+    <button class="tab" onclick="showTab('asistente',this)">🤖 Asistente</button>
+  </div>
+</nav>
+<div class="content">
+
+<!-- RECAP -->
+<div class="panel active" id="panel-recap">
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:20px">
+    <div class="recap-stat"><div class="recap-num" style="color:var(--gn)">8</div><div class="recap-lbl">MEETINGS</div></div>
+    <div class="recap-stat"><div class="recap-num" style="color:var(--pu)">10</div><div class="recap-lbl">DEALS NUEVOS</div></div>
+    <div class="recap-stat"><div class="recap-num" style="color:var(--cy)">$45.2K</div><div class="recap-lbl">COMIR CREADO</div></div>
+    <div class="recap-stat"><div class="recap-num" style="color:var(--am)">214</div><div class="recap-lbl">TAREAS ABIERTAS</div></div>
+    <div class="recap-stat"><div class="recap-num" style="color:var(--pk)">120+</div><div class="recap-lbl">WAs MARTHA</div></div>
+    <div class="recap-stat"><div class="recap-num" style="color:var(--bl)">2</div><div class="recap-lbl">DEALS COMIR HOY</div></div>
+  </div>
+  <div class="sec">LOGROS DE LA SEMANA 7-13 ABR</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px">
+    <div class="csm" style="border-color:rgba(34,197,94,0.3)"><div style="font-size:10px;color:var(--gn);font-weight:700;margin-bottom:6px">🏆 DEALS NUEVOS CREADOS</div><div style="font-size:10px;color:var(--tx2);line-height:1.8">ITS_HITS Peru $100K · ITS_Scania Peru $100K · ITS_Ferrariato $100K · ITS_NuestroDiario $100K · ITS_Pepsico $100K · TW_Chedraui $40K · TW_Nuestro Diario $40K · TW_EmpresasADOC $40K · AM_COMIR $10.2K · WB_COMIR $10K</div></div>
+    <div class="csm" style="border-color:rgba(0,201,167,0.3)"><div style="font-size:10px;color:var(--cy);font-weight:700;margin-bottom:6px">📅 MEETINGS REALIZADOS</div><div style="font-size:10px;color:var(--tx2);line-height:1.8">HITS Peru (Robert Reyna) · PepsiCo (Sunil Kumar) · IPT (César Balarezo) · Golden Lion (Bernardo Verdejo) · Casa Andina (AEO) · Evertec (Marcelo Lugo) · Chedraui (Pavel Alvarez) · Scania Peru</div></div>
+    <div class="csm" style="border-color:rgba(123,95,255,0.3)"><div style="font-size:10px;color:var(--pu);font-weight:700;margin-bottom:6px">🚀 HITOS IMPORTANTES</div><div style="font-size:10px;color:var(--tx2);line-height:1.8">COMIR: 3 deals creados $45.2K · AEO_Itera kickoff completado · Diagnóstico Golden Lion completado · ITS pipeline +$500K esta semana · AM_STIL SDR nueva propuesta</div></div>
+  </div>
+  <div class="sec">ACTIVIDAD DEL EQUIPO — SEMANA 7-13 ABR</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(123,95,255,0.2);color:var(--pu)">M</div><div><div style="font-size:13px;font-weight:700">Migue</div><div style="font-size:9px;color:var(--tx3)">Ventas / Operaciones</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--pu)">97</div><div style="font-size:8px;color:var(--tx3)">TAREAS ABIERTAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--gn)">6</div><div style="font-size:8px;color:var(--tx3)">MEETINGS</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">Deals avanzados: GPV propuesta, COMIR 3 deals, Golden Lion discovery, Casa Andina AEO, Ferrariato ITS, Casandina AM<br><span style="color:var(--am)">Highlight: Coordinó 10 deals nuevos esta semana</span></div>
+    </div>
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(0,201,167,0.2);color:var(--cy)">M</div><div><div style="font-size:13px;font-weight:700">Martha</div><div style="font-size:9px;color:var(--tx3)">SDR / Prospección</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--cy)">6</div><div style="font-size:8px;color:var(--tx3)">TAREAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--gn)">120+</div><div style="font-size:8px;color:var(--tx3)">WAs ENVIADOS</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">Fuente: HITS Peru, Chedraui, PepsiCo, IPT, Evertec — todos via Outreach Directo AM<br><span style="color:var(--am)">Highlight: 5 de los 8 meetings de la semana vinieron de su canal</span></div>
+    </div>
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(232,64,154,0.2);color:var(--pk)">F</div><div><div style="font-size:13px;font-weight:700">Fer</div><div style="font-size:9px;color:var(--tx3)">Marketing / Entregas</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--pk)">32</div><div style="font-size:8px;color:var(--tx3)">TAREAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--am)">4</div><div style="font-size:8px;color:var(--tx3)">CLIENTES ACTIVOS</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">STIL 3V copies, COMIR propuesta 360, IMMMU materiales creativos, Claude Teams migración<br><span style="color:var(--am)">Pendiente: licencias Claude Teams + láminas AM</span></div>
+    </div>
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(245,158,11,0.2);color:var(--am)">M</div><div><div style="font-size:13px;font-weight:700">Manu</div><div style="font-size:9px;color:var(--tx3)">Web / Pintaando Dev</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--am)">14</div><div style="font-size:8px;color:var(--tx3)">TAREAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--am)">3</div><div style="font-size:8px;color:var(--tx3)">PROYECTOS</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">COMIR benchmarking web, IMMMU research funcionalidades, Pintaando investigaciones x3<br><span style="color:var(--am)">Pendiente: 3 artículos blog GR</span></div>
+    </div>
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(59,130,246,0.2);color:var(--bl)">M</div><div><div style="font-size:13px;font-weight:700">Mine</div><div style="font-size:9px;color:var(--tx3)">Diseño</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--bl)">11</div><div style="font-size:8px;color:var(--tx3)">TAREAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--bl)">3</div><div style="font-size:8px;color:var(--tx3)">CLIENTES</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">STIL línea gráfica, IMMMU personajes + ciudad, posteos GR redes sociales<br><span style="color:var(--am)">Pendiente: propuestas creativas IMMMU 17-abr</span></div>
+    </div>
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(0,201,167,0.15);color:#FFD700">M</div><div><div style="font-size:13px;font-weight:700">Mike</div><div style="font-size:9px;color:var(--tx3)">CEO / Director</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:#FFD700">19</div><div style="font-size:8px;color:var(--tx3)">TAREAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--gn)">8</div><div style="font-size:8px;color:var(--tx3)">MEETINGS</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">Propuesta GPV $100K, Discovery Golden Lion, Casa Andina AEO, CETES propuesta, IMMMU PV finalizado<br><span style="color:var(--am)">Highlight: Condujo 6 de los 8 meetings de la semana</span></div>
+    </div>
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(0,201,167,0.15);color:var(--cy)">D</div><div><div style="font-size:13px;font-weight:700">Daniel</div><div style="font-size:9px;color:var(--tx3)">Analista Inteligencia Digital & AM</div></div><span style="font-size:8px;background:rgba(34,197,94,0.2);color:var(--gn);padding:2px 6px;border-radius:4px;height:fit-content">NUEVO 22-ABR</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--cy)">—</div><div style="font-size:8px;color:var(--tx3)">TAREAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--gn)">22 ABR</div><div style="font-size:8px;color:var(--tx3)">PRIMER DÍA</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">Rol: Analista de Inteligencia Digital & Sales AM<br><span style="color:var(--gn)">Entra el martes 22 de abril — onboarding completo listo</span></div>
+    </div>
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(167,139,250,0.2);color:#A78BFA">D</div><div><div style="font-size:13px;font-weight:700">Diseñadora</div><div style="font-size:9px;color:var(--tx3)">Diseño — Equipo Mine + Fer</div></div><span style="font-size:8px;background:rgba(34,197,94,0.2);color:var(--gn);padding:2px 6px;border-radius:4px;height:fit-content">PRÓXIMAMENTE</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:#A78BFA">—</div><div style="font-size:8px;color:var(--tx3)">TAREAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:#A78BFA">TBD</div><div style="font-size:8px;color:var(--tx3)">FECHA INICIO</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">Trabaja con Mine + Fer en proyectos de diseño activos<br><span style="color:#A78BFA">Nombre pendiente — actualizar cuando se confirme</span></div>
+    </div>
+    <div class="person-card">
+      <div class="person-head"><div class="avatar" style="background:rgba(240,62,93,0.2);color:var(--rd)">D</div><div><div style="font-size:13px;font-weight:700">Diana</div><div style="font-size:9px;color:var(--tx3)">Pintaando Sales</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--rd)">9</div><div style="font-size:8px;color:var(--tx3)">TAREAS</div></div>
+        <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px"><div style="font-size:18px;font-weight:800;color:var(--rd)">9</div><div style="font-size:8px;color:var(--tx3)">VENCIDAS</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--tx2);line-height:1.6">Lourdes Tarasena (2 edif), Mariana Ortiz, Claudia López, Guillermo Rentería, Rodrigo Porto — todos sin movimiento desde mar-2026<br><span style="color:var(--rd)">⚠ Todas las tareas están vencidas</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="panel" id="panel-overview"><div id="ov-content"><div style="text-align:center;padding:40px;color:var(--tx3)">Presiona "Actualizar" para cargar datos en vivo de HubSpot</div></div></div>
+
+<!-- PIPELINE -->
+<div class="panel" id="panel-pipeline"><div id="pl-content"><div style="text-align:center;padding:40px;color:var(--tx3)">Presiona "Actualizar" para cargar datos en vivo de HubSpot</div></div></div>
+
+<!-- WON -->
+<div class="panel" id="panel-won">
+  <div class="card" style="overflow:auto;margin-bottom:14px">
+    <table>
+      <thead><tr><th></th><th>Cliente</th><th>Prod</th><th>$/año</th><th>Vence</th><th>Renovar antes</th><th>Nota</th></tr></thead>
+      <tbody id="won-tbody"></tbody>
+    </table>
+  </div>
+  <p style="font-size:11px;color:var(--tx3)">Ingresos Won anuales: <span style="color:var(--cy);font-weight:700">$102K/año</span></p>
+</div>
+
+<!-- CLIENTES -->
+<div class="panel" id="panel-clientes">
+  <p style="font-size:11px;color:var(--tx3);margin-bottom:14px">8 cuentas con consultoría activa o múltiples deals — vista de cartera cruzada</p>
+  <div class="gcli" id="cli-grid"></div>
+</div>
+
+<!-- PENDIENTES -->
+<div class="panel" id="panel-pendientes">
+  <div class="psidebar" id="persona-tabs"></div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:9px;color:var(--tx3);letter-spacing:1px">ESTADO:</span>
+    <button class="pfbtn active" onclick="setFiltro('todos',this)">Todos</button>
+    <button class="pfbtn" onclick="setFiltro('vencidas',this)" style="border-color:rgba(240,62,93,0.4);color:var(--rd)">🔴 Vencidas</button>
+    <button class="pfbtn" onclick="setFiltro('hoy',this)" style="border-color:rgba(245,158,11,0.4);color:var(--am)">🟡 Hoy</button>
+    <button class="pfbtn" onclick="setFiltro('proximas',this)">🟢 Próximas</button>
+    <button class="pfbtn" onclick="setFiltro('alta',this)">🔥 Alta prioridad</button>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:9px;color:var(--tx3);letter-spacing:1px">PRODUCTO:</span>
+    <button class="pfbtn active2" onclick="setProducto('todos',this)">Todos</button>
+    <button class="pfbtn" onclick="setProducto('ITS',this)" style="color:#F03E5D;border-color:rgba(240,62,93,0.3)">ITS</button>
+    <button class="pfbtn" onclick="setProducto('TW',this)" style="color:#3B82F6;border-color:rgba(59,130,246,0.3)">TW</button>
+    <button class="pfbtn" onclick="setProducto('AEO',this)" style="color:#00C9A7;border-color:rgba(0,201,167,0.3)">AEO</button>
+    <button class="pfbtn" onclick="setProducto('AM',this)" style="color:#F59E0B;border-color:rgba(245,158,11,0.3)">AM</button>
+    <button class="pfbtn" onclick="setProducto('3V',this)" style="color:#E8409A;border-color:rgba(232,64,154,0.3)">3V</button>
+    <button class="pfbtn" onclick="setProducto('GenIA',this)" style="color:#7B5FFF;border-color:rgba(123,95,255,0.3)">GenIA</button>
+    <button class="pfbtn" onclick="setProducto('WB',this)" style="color:#22C55E;border-color:rgba(34,197,94,0.3)">WB</button>
+    <button class="pfbtn" onclick="setProducto('INT',this)">GR Interno</button>
+    <button class="pfbtn" onclick="setProducto('PT',this)">Pintaando</button>
+    <input id="pbuscar" type="text" placeholder="Buscar tarea..." oninput="renderTareas()" style="margin-left:auto">
+  </div>
+  <div id="tareas-list"></div>
+  <div id="tareas-count" style="font-size:10px;color:var(--tx3);margin-top:8px"></div>
+</div>
+
+<!-- ALERTAS -->
+<div class="panel" id="panel-alertas">
+  <div class="g3">
+    <div class="kpi" style="border-color:rgba(240,62,93,0.3)"><div class="kbar" style="background:linear-gradient(90deg,var(--rd),transparent)"></div><div class="kl" style="color:var(--rd)">🚨 CRITICAS</div><div class="kv" style="color:var(--rd)">5</div><div class="ks">Bloquean revenue — actuar HOY</div></div>
+    <div class="kpi" style="border-color:rgba(245,158,11,0.3)"><div class="kbar" style="background:linear-gradient(90deg,var(--am),transparent)"></div><div class="kl" style="color:var(--am)">⚠️ IMPORTANTES</div><div class="kv" style="color:var(--am)">6</div><div class="ks">Impactan deals esta semana</div></div>
+    <div class="kpi" style="border-color:rgba(59,130,246,0.3)"><div class="kbar" style="background:linear-gradient(90deg,var(--bl),transparent)"></div><div class="kl" style="color:var(--bl)">🔧 OPERATIVAS</div><div class="kv" style="color:var(--bl)">7</div><div class="ks">Bloquean entregas al equipo</div></div>
+  </div>
+  <div id="alertas-list"></div>
+</div>
+
+<!-- AM -->
+<div class="panel" id="panel-am"><div id="am-content"></div></div>
+
+<!-- FORECAST -->
+<div class="panel" id="panel-forecast">
+  <div class="g3">
+    <div class="kpi" style="text-align:center"><div class="kbar" style="background:linear-gradient(90deg,#8B95A788,transparent)"></div><div class="kl">CONSERVADOR</div><div class="kv" style="color:var(--tx2);font-size:28px" id="fc-cons">—</div><div class="ks">Solo propuestas x 35%</div></div>
+    <div class="kpi" style="text-align:center"><div class="kbar" style="background:linear-gradient(90deg,#7B5FFF88,transparent)"></div><div class="kl">BASE</div><div class="kv" style="color:var(--pu);font-size:28px" id="fc-base">—</div><div class="ks">Propuestas + Educación</div></div>
+    <div class="kpi" style="text-align:center"><div class="kbar" style="background:linear-gradient(90deg,#00C9A788,transparent)"></div><div class="kl">OPTIMISTA</div><div class="kv" style="color:var(--cy);font-size:28px" id="fc-opt">—</div><div class="ks">Todos stages ponderados</div></div>
+  </div>
+  <div class="sec">CLOSES PRÓXIMOS 30 DÍAS</div>
+  <div id="fc-closes"></div>
+</div>
+
+<!-- ASISTENTE -->
+<div class="panel" id="panel-asistente">
+  <div style="margin-bottom:12px;padding:10px 14px;background:rgba(123,95,255,0.08);border:1px solid rgba(123,95,255,0.2);border-radius:10px;font-size:11px;color:var(--tx2);line-height:1.6">
+    <strong style="color:var(--pu)">🤖 Asistente GR Revenue Intelligence</strong><br>
+    Tengo el contexto completo: pipeline, Won, alertas, AM, clientes, equipo. Pregúntame lo que necesites sobre el estado comercial de GR.
+  </div>
+  <div id="chat-msgs"></div>
+  <div class="crow">
+    <input id="cin" type="text" placeholder="¿Qué deals cierran esta semana? ¿Alertas más urgentes? ¿Cómo va Martha?..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button id="csend" onclick="sendMsg()">Enviar</button>
+  </div>
+</div>
+
+</div><!-- /content -->
+<footer>
+  <div>GR Revenue Intelligence · HubSpot 49671716 · Webhook: mikea.app.n8n.cloud</div>
+  <div id="finfo">9 tabs · 214 tareas · 45 deals activos · 19 Abr 2026</div>
+</footer>
+<script>
+
+// DATOS EMBEBIDOS — fallback cuando no hay conexión al webhook
+// Generados el 19-Abr-2026 desde HubSpot real
+const DATOS_EMBEBIDOS = {
+  ok: true,
+  generadoEn: '2026-04-19T14:08:34Z',
+  kpis: {
+    pipeline: 1380000,
+    forecast: 290000,
+    totalDeals: 45,
+    propuestasCount: 6,
+    propuestasTotal: 265200,
+    educacionCount: 17,
+    atraccionCount: 12,
+    wonAnual: 102065,
+  },
+  deals: [
+    {id:58225856373,name:'ITS_CETES — IT Support',stage:'qualifiedtobuy',stageLabel:'Educación',amount:100000,owner:'Migue',closedate:'2026-06-30',prod:'ITS'},
+    {id:58227864942,name:'ITS_GPV / Ney Galicia',stage:'presentationscheduled',stageLabel:'Propuesta',amount:100000,owner:'Migue',closedate:'2026-06-20',prod:'ITS'},
+    {id:59049422450,name:'ITS_HITS',stage:'qualifiedtobuy',stageLabel:'Educación',amount:100000,owner:'Migue',closedate:'2026-06-30',prod:'ITS'},
+    {id:59120582170,name:'ITS_Ferrariato',stage:'qualifiedtobuy',stageLabel:'Educación',amount:100000,owner:'Migue',closedate:'2026-06-30',prod:'ITS'},
+    {id:58886130743,name:'ITS_Pepsico',stage:'qualifiedtobuy',stageLabel:'Educación',amount:100000,owner:'Martha',closedate:'2026-06-30',prod:'ITS'},
+    {id:58886177067,name:'ITS_Servex',stage:'1332596063',stageLabel:'Contactado',amount:100000,owner:'Martha',closedate:'2026-06-30',prod:'ITS'},
+    {id:58886378107,name:'ITS_NuestroDiario',stage:'1332596063',stageLabel:'Contactado',amount:100000,owner:'Migue',closedate:'2026-06-30',prod:'ITS'},
+    {id:58633777075,name:'ITS_Internet Para Todos',stage:'appointmentscheduled',stageLabel:'Atracción',amount:100000,owner:'Martha',closedate:'2026-06-30',prod:'ITS'},
+    {id:58440112661,name:'ITS_Evertec',stage:'qualifiedtobuy',stageLabel:'Educación',amount:100000,owner:'Martha',closedate:null,prod:'ITS'},
+    {id:58230710933,name:'TW_Avianca — Bianca',stage:'presentationscheduled',stageLabel:'Propuesta',amount:100000,owner:'Migue',closedate:'2026-06-30',prod:'TW'},
+    {id:58826994804,name:'TW_Wella',stage:'appointmentscheduled',stageLabel:'Atracción',amount:40000,owner:'Martha',closedate:null,prod:'TW'},
+    {id:58998143612,name:'TW_Chedraui',stage:'appointmentscheduled',stageLabel:'Atracción',amount:40000,owner:'Martha',closedate:'2026-06-30',prod:'TW'},
+    {id:58207842213,name:'TW_Gentera',stage:'qualifiedtobuy',stageLabel:'Educación',amount:40000,owner:'Martha',closedate:'2026-06-30',prod:'TW'},
+    {id:58886552963,name:'TW_EmpresasADOC',stage:'1332596063',stageLabel:'Contactado',amount:40000,owner:'Martha',closedate:'2026-06-30',prod:'TW'},
+    {id:59121792033,name:'TW_Nuestro Diario',stage:'1332596064',stageLabel:'En Conv.',amount:40000,owner:'Martha',closedate:'2026-05-31',prod:'TW'},
+    {id:43422066554,name:'TW Banco Finandina',stage:'appointmentscheduled',stageLabel:'Atracción',amount:37500,owner:'Migue',closedate:'2026-03-24',prod:'TW'},
+    {id:39262015844,name:'TW premium.com.sv',stage:'presentationscheduled',stageLabel:'Propuesta',amount:37500,owner:'Migue',closedate:'2025-06-30',prod:'TW'},
+    {id:58217644452,name:'GenIA_CETES — Call Center',stage:'qualifiedtobuy',stageLabel:'Educación',amount:50000,owner:'Migue',closedate:'2026-06-30',prod:'GenIA'},
+    {id:58219186492,name:'GenIA_CETES — Workforce',stage:'qualifiedtobuy',stageLabel:'Educación',amount:30000,owner:'Migue',closedate:'2026-06-30',prod:'GenIA'},
+    {id:58214803286,name:'GenIA_Banco Santa Cruz RD',stage:'appointmentscheduled',stageLabel:'Atracción',amount:20000,owner:'Migue',closedate:'2026-06-30',prod:'GenIA'},
+    {id:58221827446,name:'AEO_SURA Corporativo',stage:'presentationscheduled',stageLabel:'Propuesta',amount:15000,owner:'Migue',closedate:'2026-04-30',prod:'AEO'},
+    {id:59121725625,name:'AEO_Golden Lion',stage:'presentationscheduled',stageLabel:'Propuesta',amount:15000,owner:'Martha',closedate:'2026-06-30',prod:'AEO'},
+    {id:58658165298,name:'AEO_Casa Andina',stage:'qualifiedtobuy',stageLabel:'Educación',amount:15000,owner:'Martha',closedate:'2026-06-30',prod:'AEO'},
+    {id:58499112617,name:'AEO_FERRISARIATO',stage:'qualifiedtobuy',stageLabel:'Educación',amount:15000,owner:'Migue',closedate:null,prod:'AEO'},
+    {id:58227395440,name:'AM_IMMMU',stage:'presentationscheduled',stageLabel:'Propuesta',amount:10200,owner:'Migue',closedate:'2026-05-20',prod:'AM'},
+    {id:56709492151,name:'AM_Halo',stage:'presentationscheduled',stageLabel:'Propuesta',amount:10200,owner:'Martha',closedate:'2026-06-01',prod:'AM'},
+    {id:58206923537,name:'AM_Konnen — Renovación',stage:'appointmentscheduled',stageLabel:'Atracción',amount:10000,owner:'Migue',closedate:'2026-06-30',prod:'AM'},
+    {id:58220138006,name:'AM_Kio — Renovación',stage:'appointmentscheduled',stageLabel:'Atracción',amount:10000,owner:'Migue',closedate:'2026-06-30',prod:'AM'},
+    {id:58221379219,name:'AM_Itera Process — Renovación',stage:'appointmentscheduled',stageLabel:'Atracción',amount:10200,owner:'Migue',closedate:'2026-10-01',prod:'AM'},
+    {id:59121728585,name:'AM_Casandina',stage:'qualifiedtobuy',stageLabel:'Educación',amount:10200,owner:'Migue',closedate:'2026-05-31',prod:'AM'},
+    {id:58450268928,name:'3V_COMIR',stage:'presentationscheduled',stageLabel:'Propuesta',amount:25000,owner:'Migue',closedate:'2026-04-30',prod:'3V'},
+    {id:59137847907,name:'AM_COMIR',stage:'presentationscheduled',stageLabel:'Propuesta',amount:10200,owner:'Migue',closedate:'2026-06-30',prod:'AM'},
+    {id:59141178735,name:'WB_COMIR',stage:'presentationscheduled',stageLabel:'Propuesta',amount:10000,owner:'Migue',closedate:'2026-06-30',prod:'WB'},
+    {id:58225380388,name:'WB_STIL + AEO',stage:'presentationscheduled',stageLabel:'Propuesta',amount:15000,owner:'Migue',closedate:'2026-04-15',prod:'WB'},
+    {id:59132773150,name:'WB_IMMMU',stage:'presentationscheduled',stageLabel:'Propuesta',amount:10000,owner:'Migue',closedate:'2026-06-30',prod:'WB'},
+    {id:59132714153,name:'HS_UDG — Renovación',stage:'appointmentscheduled',stageLabel:'Atracción',amount:15000,owner:'Migue',closedate:'2026-05-31',prod:'HS'},
+    {id:58225225112,name:'EX_IMMMU — Búsqueda vendedor',stage:'appointmentscheduled',stageLabel:'Atracción',amount:1800,owner:'Migue',closedate:'2026-04-20',prod:'EX'},
+  ],
+  won: [
+    {id:37119453274,name:'AM-Kio',amount:10000,closedate:'2026-06-17',prod:'AM',owner:'Migue'},
+    {id:37492230662,name:'HS_UDG',amount:15000,closedate:'2026-05-31',prod:'HS',owner:'Migue'},
+    {id:42920441898,name:'AM_TD SYNNEX',amount:10200,closedate:'2027-01-14',prod:'AM',owner:'Migue'},
+    {id:47416093361,name:'AM_STIL',amount:10200,closedate:'2026-12-04',prod:'AM',owner:'Migue'},
+    {id:58207072114,name:'TW_Berel',amount:10565,closedate:'2027-01-31',prod:'TW',owner:'Migue'},
+    {id:58207210931,name:'360_STIL Marketing 3V',amount:1400,closedate:'2026-12-31',prod:'3V',owner:'Migue'},
+    {id:58209863980,name:'AEO_Itera Process',amount:10000,closedate:'2026-04-01',prod:'AEO',owner:'Migue'},
+    {id:58218559539,name:'360_IMMMU Marketing 3V',amount:1700,closedate:'2026-12-31',prod:'3V',owner:'Migue'},
+    {id:58223074130,name:'AM_Itera Process',amount:10200,closedate:'2026-10-16',prod:'AM',owner:'Migue'},
+    {id:58227111762,name:'TW_Miniso Colombia',amount:13000,closedate:'2027-04-30',prod:'TW',owner:'Migue'},
+    {id:37119448109,name:'AM-Konnen',amount:10000,closedate:'2026-09-17',prod:'AM',owner:'Migue'},
+  ],
+  tareas: {},
+};
+
+
+// URL de datos - cuando se sirve desde n8n, misma URL base = sin CORS
+const WEBHOOK = window.location.hostname === 'mikea.app.n8n.cloud'
+  ? 'https://mikea.app.n8n.cloud/webhook/gr-dashboard'
+  : 'https://mikea.app.n8n.cloud/webhook/gr-dashboard';
+
+const PC={ITS:'#F03E5D',TW:'#3B82F6',AEO:'#00C9A7',GenIA:'#7B5FFF',AM:'#F59E0B','3V':'#E8409A',WB:'#22C55E',HS:'#60A5FA',EX:'#A78BFA',Otro:'#94A3B8'};
+let DATA=null, chatMsgs=[], personaActual='Migue', filtroActual='todos', productoActual='todos';
+const fmt=n=>!n?'—':n>=1000?'$'+Math.round(n/1000)+'K':'$'+n;
+const tag=(p)=>{const c=PC[p]||'#94A3B8';return`<span class="tag" style="background:${c}22;color:${c}">${p}</span>`};
+const dTo=(d)=>{if(!d)return null;return Math.floor((new Date(d)-new Date('2026-04-19'))/86400000)};
+const dLabel=(d)=>{if(d===null)return'';if(d===0)return'<span style="color:var(--rd);font-weight:700;font-size:9px">🔥 HOY</span>';if(d<0)return`<span style="color:var(--rd);font-size:9px">${Math.abs(d)}d venc.</span>`;if(d<=7)return`<span style="color:var(--am);font-size:9px">${d}d</span>`;return`<span style="color:var(--tx3);font-size:9px">${d}d</span>`};
+
+// ── LOAD DATA ─────────────────────────────────────────────────────
+async function loadData(){
+  const btn=document.getElementById('btnref');
+  const ov=document.getElementById('overlay');
+  const err=document.getElementById('err');
+  btn.disabled=true;btn.textContent='⟳ Jalando HubSpot...';ov.classList.add('show');err.style.display='none';
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),20000);
+    const res=await fetch(WEBHOOK,{method:'GET',headers:{'Accept':'application/json'},signal:controller.signal});
+    clearTimeout(timeout);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    if(!d.ok) throw new Error('Respuesta inválida');
+    DATA=d;renderDynamic();
+    const now=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('last-upd').textContent='✅ Act. '+now+' — HubSpot Live';
+    document.getElementById('finfo').textContent=`${d.deals?.length||0} deals · ${d.won?.length||0} won · ${d.generadoEn?.split('T')[0]||''}`;
+    err.style.display='none';
+  }catch(e){
+    if(!DATA||DATA===DATOS_EMBEBIDOS){DATA=DATOS_EMBEBIDOS;renderDynamic();}
+    document.getElementById('last-upd').textContent='📋 Datos 19-Abr';
+    err.textContent='⚠️ Sin conexión live: '+e.message;
+    err.style.display='block';
+    setTimeout(()=>{err.style.display='none';},4000);
+  }
+  ov.classList.remove('show');btn.disabled=false;btn.textContent='⟳ Actualizar';
+}
+
+// ── TABS ──────────────────────────────────────────────────────────
+function showTab(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────
+function renderOverview(){
+  if(!DATA)return;
+  const {kpis,deals}=DATA;
+  const props=deals.filter(d=>d.stage==='presentationscheduled');
+  const kpiHtml=[
+    {l:'PIPELINE TOTAL',v:fmt(kpis.pipeline),s:`${kpis.totalDeals} deals`,c:'var(--pu)'},
+    {l:'FORECAST POND.',v:fmt(kpis.forecast),s:'ponderado x stage',c:'var(--cy)'},
+    {l:'EN PROPUESTA',v:kpis.propuestasCount,s:fmt(kpis.propuestasTotal),c:'var(--pk)'},
+    {l:'EN EDUCACIÓN',v:kpis.educacionCount,s:'deals educación',c:'var(--bl)'},
+    {l:'EN ATRACCIÓN',v:kpis.atraccionCount,s:'meetings hechos',c:'var(--gn)'},
+    {l:'WON ANUAL',v:fmt(kpis.wonAnual),s:'ingresos recurrentes',c:'var(--gn)'},
+  ].map(k=>`<div class="kpi"><div class="kbar" style="background:linear-gradient(90deg,${k.c}88,transparent)"></div><div class="kl">${k.l}</div><div class="kv" style="color:${k.c}">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
+  const propHtml=props.length===0?'<div style="color:var(--tx3);font-size:11px">Sin propuestas activas</div>':props.sort((a,b)=>(dTo(a.closedate)||999)-(dTo(b.closedate)||999)).map(d=>`<div class="drow" style="border-color:${dTo(d.closedate)!==null&&dTo(d.closedate)<=3?'rgba(240,62,93,0.3)':'var(--bdr)'}"><span>${tag(d.prod)}</span><div class="dn">${d.name}</div><span style="color:var(--cy);font-size:11px;font-weight:700">${fmt(d.amount)}</span>${dLabel(dTo(d.closedate))}</div>`).join('');
+  const topHtml=deals.sort((a,b)=>b.amount-a.amount).slice(0,8).map(d=>`<div class="drow"><span>${tag(d.prod)}</span><div class="dn">${d.name}</div><span style="color:var(--cy);font-size:11px;font-weight:700">${fmt(d.amount)}</span><span style="font-size:9px;color:var(--tx3)">${d.stageLabel}</span></div>`).join('');
+  document.getElementById('ov-content').innerHTML=`<div class="gkpi">${kpiHtml}</div><div class="g2"><div><div class="sec">PROPUESTAS EN CIERRE</div>${propHtml}</div><div><div class="sec">TOP DEALS POR MONTO</div>${topHtml}</div></div>`;
+}
+
+// ── PIPELINE ──────────────────────────────────────────────────────
+function renderPipeline(){
+  if(!DATA)return;
+  const {deals}=DATA;
+  const STAGES=[
+    {k:'presentationscheduled',l:'PROPUESTA',c:'#E8409A'},
+    {k:'qualifiedtobuy',l:'EDUCACIÓN',c:'#3B82F6'},
+    {k:'appointmentscheduled',l:'ATRACCIÓN',c:'#22C55E'},
+    {k:'1332596064',l:'EN CONV.',c:'#F59E0B'},
+    {k:'1332596063',l:'CONTACTADO',c:'#00C9A7'},
+    {k:'1332596062',l:'REPLY',c:'#A78BFA'},
+    {k:'1332596061',l:'SEÑAL',c:'#94A3B8'},
+  ];
+  let html=`<p style="font-size:11px;color:var(--tx3);margin-bottom:14px">${deals.length} deals activos · ${fmt(deals.reduce((s,d)=>s+d.amount,0))}</p>`;
+  STAGES.forEach(st=>{
+    const ds=deals.filter(d=>d.stage===st.k);
+    if(!ds.length)return;
+    html+=`<div class="sgr"><div class="sh"><div class="sdot" style="background:${st.c}"></div><span style="font-size:10px;font-weight:700;color:${st.c};letter-spacing:1px">${st.l}</span><span style="font-size:10px;color:var(--tx3)">${ds.length} deals · ${fmt(ds.reduce((s,d)=>s+d.amount,0))}</span></div><div class="gauto">${ds.sort((a,b)=>b.amount-a.amount).map(d=>`<div class="csm"><div style="font-size:11px;font-weight:600;margin-bottom:6px;line-height:1.3">${d.name}</div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--cy);font-size:12px;font-weight:700">${fmt(d.amount)}</span><span style="font-size:10px;color:var(--tx3)">${d.owner}</span></div><div style="display:flex;gap:4px;flex-wrap:wrap">${tag(d.prod)}${dTo(d.closedate)!==null?dLabel(dTo(d.closedate)):''}</div></div>`).join('')}</div></div>`;
+  });
+  document.getElementById('pl-content').innerHTML=html;
+}
+
+// ── WON ───────────────────────────────────────────────────────────
+const WON_DATA=[
+  {n:'AM_Kio',prod:'AM',amt:10000,vence:'2026-06-17',renovar:'2026-04-17',st:'urgente',nota:'VENCE JUN — contactar HOY'},
+  {n:'HS_UDG',prod:'HS',amt:15000,vence:'2026-05-31',renovar:'2026-03-31',st:'urgente',nota:'VENCE 31 MAY — proceso activo'},
+  {n:'AM_Konnen',prod:'AM',amt:10000,vence:'2026-09-17',renovar:'2026-06-17',st:'atencion',nota:'Renovar antes jun-2026'},
+  {n:'AM_STIL',prod:'AM',amt:10200,vence:'2026-12-04',renovar:'2026-09-04',st:'ok',nota:'AM activa'},
+  {n:'360_STIL 3V',prod:'3V',amt:1400,vence:'2026-12-31',renovar:'2026-10-01',st:'ok',nota:'Facturas mar+abr PENDIENTES'},
+  {n:'360_IMMMU 3V',prod:'3V',amt:1700,vence:'2026-12-31',renovar:'2026-10-01',st:'ok',nota:'Factura abril PENDIENTE'},
+  {n:'AM_Itera',prod:'AM',amt:10200,vence:'2026-10-16',renovar:'2026-07-16',st:'ok',nota:'—'},
+  {n:'AEO_Itera',prod:'AEO',amt:10000,vence:'2026-04-01',renovar:'2026-07-01',st:'ok',nota:'Kickoff completado 6-abr'},
+  {n:'TW_Miniso Col.',prod:'TW',amt:13000,vence:'2027-04-30',renovar:'2027-01-30',st:'ok',nota:'—'},
+  {n:'TW_Berel',prod:'TW',amt:10565,vence:'2027-01-31',renovar:'2026-10-31',st:'ok',nota:'—'},
+  {n:'AM_TD SYNNEX',prod:'AM',amt:10200,vence:'2027-01-14',renovar:'2026-10-14',st:'ok',nota:'—'},
+];
+function renderWon(){
+  const sorted=[...WON_DATA].sort((a,b)=>({urgente:0,atencion:1,ok:2}[a.st])-({urgente:0,atencion:1,ok:2}[b.st]));
+  document.getElementById('won-tbody').innerHTML=sorted.map(w=>{
+    const icon=w.st==='urgente'?'🚨':w.st==='atencion'?'⚠️':'✅';
+    const col=w.st==='urgente'?'var(--rd)':w.st==='atencion'?'var(--am)':'var(--gn)';
+    return`<tr><td style="font-size:16px">${icon}</td><td style="font-weight:600">${w.n}</td><td>${tag(w.prod)}</td><td style="color:var(--cy);font-weight:700">${fmt(w.amt)}</td><td style="color:var(--tx3)">${w.vence}</td><td style="color:${col};font-weight:600">${w.renovar}</td><td style="color:${col}">${w.nota}</td></tr>`;
+  }).join('');
+}
+
+// ── CLIENTES ──────────────────────────────────────────────────────
+const CLIENTES=[
+  {cli:'STIL',icon:'⭐',total:'$36.6K',own:'Mike/Migue',ct:'Estela Escalante / Mayela',
+   deals:[{n:'AM_STIL Won',p:'AM',s:'✅ Activa',m:'$10.2K/año'},{n:'360_STIL 3V Won',p:'3V',s:'✅ Activa',m:'$1.4K/mes'},{n:'WB_STIL + AEO',p:'WB',s:'🔥 Propuesta',m:'$15K'},{n:'AM_STIL SDR',p:'AM',s:'📋 Nueva propuesta',m:'TBD'}],
+   nota:'4 productos activos. WB_STIL cierra HOY — confirmar con Estela.'},
+  {cli:'IMMMU',icon:'🌟',total:'$23.7K',own:'Mike',ct:'María Santoyo / Servando Conde',
+   deals:[{n:'AM_IMMMU',p:'AM',s:'📋 Propuesta enviada',m:'$10.2K'},{n:'360_IMMMU 3V Won',p:'3V',s:'✅ Activa',m:'$1.7K/mes'},{n:'WB_IMMMU',p:'WB',s:'📐 Cotizando',m:'$10K'},{n:'EX_IMMMU Vendedor',p:'EX',s:'🔍 Búsqueda',m:'$1.8K'}],
+   nota:'4 productos simultáneos. Factura 3V abril sin emitir — urgente.'},
+  {cli:'CETES',icon:'🔥',total:'$180K',own:'Mike',ct:'Óscar Morales',
+   deals:[{n:'ITS_CETES',p:'ITS',s:'🎓 Educación',m:'$100K'},{n:'GenIA_CETES CC',p:'GenIA',s:'🎓 Educación',m:'$50K'},{n:'GenIA_CETES WF',p:'GenIA',s:'🎓 Educación',m:'$30K'}],
+   nota:'Paquete $180K — el más grande del pipeline. Propuesta completa en preparación.'},
+  {cli:'GPV / Peña Verde',icon:'⚡',total:'$100K',own:'Mike',ct:'Ney Galicia / Raúl Gutiérrez',
+   deals:[{n:'ITS_GPV / Ney Galicia',p:'ITS',s:'📩 Propuesta',m:'$100K'}],
+   nota:'Propuesta formal 13-abr. Deal más urgente del pipeline. Potencial GenIA adicional.'},
+  {cli:'Itera Process',icon:'✅',total:'$20.2K',own:'Mike',ct:'Carolina Vázquez',
+   deals:[{n:'AM_Itera Won',p:'AM',s:'✅ Activa',m:'$10.2K/año'},{n:'AEO_Itera Won',p:'AEO',s:'✅ Kickoff 6-abr',m:'$10K'}],
+   nota:'2 productos en ejecución simultánea. Seguimiento accesos GSC+GA pendiente.'},
+  {cli:'COMIR',icon:'🆕',total:'$45.2K',own:'Migue',ct:'Anaí Cruz',
+   deals:[{n:'360_COMIR 3V',p:'3V',s:'🎓 Educación',m:'$25K'},{n:'AM_COMIR',p:'AM',s:'🎓 Educación',m:'$10.2K'},{n:'WB_COMIR',p:'WB',s:'🎓 Educación',m:'$10K'}],
+   nota:'3 deals creados 13-abr. Propuesta integral 3V+AM+WB. Reunión 22-abr.'},
+  {cli:'Golden Lion',icon:'🌱',total:'$15K',own:'Migue',ct:'Bernardo Verdejo',
+   deals:[{n:'AEO_Golden Lion',p:'AEO',s:'🎓 Educación',m:'$15K'}],
+   nota:'16 casinos. Discovery completado. Propuesta formal enviada por Mike.'},
+  {cli:'Ferrisariato / El Rosado',icon:'🌱',total:'$15K',own:'Mike/Migue',ct:'Valeria',
+   deals:[{n:'AEO_FERRISARIATO',p:'AEO',s:'🎓 Educación',m:'$15K'}],
+   nota:'Corp El Rosado Ecuador. Sesión 16-abr. Si cierra → réplica en todo el grupo.'},
+];
+function renderClientes(){
+  document.getElementById('cli-grid').innerHTML=CLIENTES.map(cl=>`
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--bdr);background:var(--card2)">
+        <span style="font-size:18px">${cl.icon}</span>
+        <div style="flex:1"><div style="font-size:14px;font-weight:700">${cl.cli}</div><div style="font-size:9px;color:var(--tx3)">${cl.deals.length} deal(s) · ${cl.own} · ${cl.ct}</div></div>
+        <div style="font-size:16px;font-weight:800;color:var(--cy)">${cl.total}</div>
+      </div>
+      <div style="padding:10px 14px">
+        ${cl.deals.map((d,j)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:${j<cl.deals.length-1?'1px solid var(--bdr)':'none'}">${tag(d.p)}<div style="flex:1;font-size:11px;color:var(--tx2)">${d.n}</div><div style="font-size:10px;color:var(--tx3)">${d.m}</div><div style="font-size:10px;color:var(--cy)">${d.s}</div></div>`).join('')}
+        <div style="margin-top:10px;padding:8px 10px;background:rgba(123,95,255,0.07);border-radius:7px;font-size:10px;color:var(--tx2);font-style:italic">${cl.nota}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── PENDIENTES ────────────────────────────────────────────────────
+const PERSONAS=['Migue','Mike','Martha','Fer','Mine','Manu','Daniel','Diana','Diseñadora'];
+const TAREAS={
+  Migue:[
+    {s:'STIL — Emitir factura Marketing 3V marzo 2026',p:'HIGH',f:'2026-03-20'},
+    {s:'AM_KIO — Renovación URGENTE jun 2026 — Contactar Maghandi',p:'HIGH',f:'2026-03-24'},
+    {s:'AM_KONNEN — Renovación URGENTE jun 2026 — Contactar Javier Roldán',p:'HIGH',f:'2026-03-24'},
+    {s:'HS_UDG — Renovación VENCE 31-may-2026 — URGENTE iniciar proceso',p:'HIGH',f:'2026-03-25'},
+    {s:'HS_Fraiche — Renovación VENCE 31-may-2026 — URGENTE',p:'HIGH',f:'2026-03-25'},
+    {s:'AM_Kio — Llamar a Aarón: ¿van a renovar?',p:'HIGH',f:'2026-03-31'},
+    {s:'HS_UDG — Hablar con Dani: renovación y usuarios clave',p:'HIGH',f:'2026-03-31'},
+    {s:'AEO_FERRISARIATO — Confirmar página web El Rosado',p:'HIGH',f:'2026-03-31'},
+    {s:'IMMMU — Emitir factura Marketing 3V abril 2026',p:'MEDIUM',f:'2026-04-01'},
+    {s:'STIL — Emitir factura Marketing 3V abril 2026',p:'MEDIUM',f:'2026-04-01'},
+    {s:'IMMMU — Recibir y revisar propuesta de valor',p:'HIGH',f:'2026-04-03'},
+    {s:'AM Quality & Knowledge — Contactar a Víctor',p:'MEDIUM',f:'2026-04-06'},
+    {s:'UDG — Hablar con Dani y Miguel sobre renovación',p:'MEDIUM',f:'2026-04-06'},
+    {s:'TW_Gentera — Contactar para presentar reporte',p:'MEDIUM',f:'2026-04-06'},
+    {s:'AEO_Golden Lion — Reunión Discovery 6-abr',p:'HIGH',f:'2026-04-06'},
+    {s:'AEO_GOLDEN LION — Enviar correo Buyer Persona + prompts',p:'HIGH',f:'2026-04-07'},
+    {s:'PINTAANDO — Ordenar todos los temas + preguntar Diana status',p:'HIGH',f:'2026-04-08'},
+    {s:'WhatsApp Business — Configurar cuenta con imagen GR',p:'HIGH',f:'2026-04-07'},
+    {s:'INT — Sync AEO+SEO: revisar entregables Uri + coordinar Nico',p:'MEDIUM',f:'2026-04-10'},
+    {s:'ITS_CETES — Sesión con Óscar Morales para avanzar propuesta',p:'HIGH',f:'2026-04-10'},
+    {s:'ITERA AEO — Seguimiento accesos GSC+GA+BWT',p:'HIGH',f:'2026-04-11'},
+    {s:'FERRISARIATO — Solicitar acceso web antes de sesión 16-abr',p:'HIGH',f:'2026-04-13'},
+    {s:'AM_Kio Renovación — Contactar Aarón Cruz',p:'HIGH',f:'2026-04-13'},
+    {s:'ITS_HITS Perú — Mandar WhatsApp a Héctor',p:'HIGH',f:'2026-04-13'},
+    {s:'ITS_Ferrariato — Solicitar acceso página web',p:'HIGH',f:'2026-04-13'},
+    {s:'GR INTERNO — Migue: corregir Hand-off convenciones AM',p:'HIGH',f:'2026-04-13'},
+    {s:'AM_Casandina — Enviar casos de éxito',p:'MEDIUM',f:'2026-04-13'},
+    {s:'KIO — Confirmar estatus renovación con Aarón',p:'HIGH',f:'2026-04-14'},
+    {s:'STIL — Enviar minuta a Mayela y Julio',p:'HIGH',f:'2026-04-14'},
+    {s:'PEPSICO — Crear nota detallada Discovery en HubSpot',p:'MEDIUM',f:'2026-04-14'},
+    {s:'STIL — Enviar slides presentación + reporte KPIs',p:'HIGH',f:'2026-04-14'},
+    {s:'HS_UDG — Confirmar fecha correcta renovación con Daniela',p:'HIGH',f:'2026-04-14'},
+    {s:'Itera Process — Enviar factura 3V pendiente',p:'HIGH',f:'2026-04-14'},
+    {s:'FERRISARIATO — Presionar a Valeria por acceso web',p:'HIGH',f:'2026-04-14'},
+    {s:'AM_IMMMU — Tener contactos IMMMU de Amplemarket listos',p:'HIGH',f:'2026-04-14'},
+    {s:'STIL 3V — Emitir factura marketing + enviar a Fer+Migue',p:'HIGH',f:'2026-04-14'},
+    {s:'STIL — Armar paquete AM + redes + captación + web',p:'HIGH',f:'2026-04-14'},
+    {s:'GR INTERNO — Revisar con Mike campañas AM + blindaje digital',p:'HIGH',f:'2026-04-14'},
+    {s:'AVIANCA — Enviar segundo WA seguimiento decisión POC',p:'HIGH',f:'2026-04-15'},
+    {s:'AM_KONNEN — Contactar persona que cambió de trabajo',p:'HIGH',f:'2026-04-15'},
+    {s:'COMIR — Confirmar liga Meet para reunión 22 abril',p:'MEDIUM',f:'2026-04-15'},
+    {s:'GENTERA — Pedir reporte a Nico + enviar a cliente',p:'MEDIUM',f:'2026-04-16'},
+    {s:'QUALITY KNOWLEDGE — Ofrecer versión económica AM',p:'MEDIUM',f:'2026-04-16'},
+    {s:'STIL — Crear paquete completo plataforma+redes+captación+web',p:'HIGH',f:'2026-04-16'},
+    {s:'ITS_Ferrariato — Sesión revisión reporte',p:'HIGH',f:'2026-04-16'},
+    {s:'PlanNet — Enviar propuesta + prueba de contactos a Daniel',p:'HIGH',f:'2026-04-16'},
+    {s:'TW_WELLA — Obtener brief y datos contexto cliente',p:'HIGH',f:'2026-04-17'},
+    {s:'TW_WELLA — Agendar presentación reporte con cliente',p:'HIGH',f:'2026-04-17'},
+    {s:'BLINDAJE DIGITAL — Lanzar campaña nuevo servicio',p:'HIGH',f:'2026-04-17'},
+    {s:'COMIR — Obtener email corporativo de Anaí Cruz',p:'MEDIUM',f:'2026-04-17'},
+    {s:'FINANDINA — Hablar con Sergio + versión económica TW',p:'MEDIUM',f:'2026-04-18'},
+    {s:'GR INTERNO — Compilar docs por producto',p:'MEDIUM',f:'2026-04-18'},
+    {s:'360_STIL Marketing 3V — Emitir factura abril 2026',p:'HIGH',f:'2026-04-19'},
+    {s:'AM_Quality & Knowledge — Ofrecer propuesta económica a Víctor',p:'MEDIUM',f:'2026-04-20'},
+    {s:'AM_IMMMU — Seguimiento con María sobre lanzamiento Fugaz',p:'MEDIUM',f:'2026-04-22'},
+  ],
+  Mike:[
+    {s:'IMMMU — Enviar esquema plan compensación 12 meses a María',p:'HIGH',f:'2026-04-02'},
+    {s:'IMMMU — Enviar documento PV finalizado a María',p:'HIGH',f:'2026-04-09'},
+    {s:'IMMMU — Cotizar página web IMU + enviar preguntas complejidad',p:'HIGH',f:'2026-04-10'},
+    {s:'GR INTERNO — Crear Doc 4 Procedimientos Operativos',p:'MEDIUM',f:'2026-04-11'},
+    {s:'GR INTERNO — Crear Playbook de Prospección y Ventas Doc B',p:'HIGH',f:'2026-04-14'},
+    {s:'GR INTERNO — Definir proveedor WhatsApp API',p:'MEDIUM',f:'2026-04-14'},
+    {s:'AM_IMMMU — Mike: elaborar propuesta leads AM para Fugaz',p:'HIGH',f:'2026-04-14'},
+    {s:'GR INTERNO — Realizar mejoras en campañas AM y TW',p:'HIGH',f:'2026-04-14'},
+    {s:'IMMMU/FUGAZ — Propuesta leads Fugaz con Amplemarket',p:'MEDIUM',f:'2026-04-15'},
+    {s:'IMMMU — Definir con Servando si continuamos con perfil vendedor B2B',p:'HIGH',f:'2026-04-15'},
+    {s:'TW_GENTERA — Generar reporte y enviar a cliente',p:'HIGH',f:'2026-04-17'},
+    {s:'TW_BANCO FINANDINA — Ofrecer nuevo servicio & generar reporte',p:'HIGH',f:'2026-04-17'},
+    {s:'GOLDEN LION — Enviar propuesta AEO formal a Bernardo',p:'HIGH',f:'2026-04-17'},
+    {s:'EX_IMMMU VENDEDOR — Reunión 18-abr: confirmar si sigue vigente',p:'MEDIUM',f:'2026-04-18'},
+    {s:'GR INTERNO — Simplificar Bloque GR del prompt de Claude Projects',p:'LOW',f:'2026-04-18'},
+  ],
+  Martha:[
+    {s:'BMI Companies — Señal Open+3: Follow-up si no responde',p:'NONE',f:'2026-04-02'},
+    {s:'Bosch — Señal Open+3: Follow-up si no responde',p:'NONE',f:'2026-04-02'},
+    {s:'MARTHA+MIGUE — Asignar owners a cada oportunidad de Atracción',p:'HIGH',f:'2026-04-09'},
+    {s:'MARTHA+MIGUE — Reunión viernes para revisar todas las cuentas',p:'HIGH',f:'2026-04-11'},
+    {s:'P_EmpresasADOC — 2 seguimientos más a Rodrigo Cárcamos',p:'MEDIUM',f:'2026-04-13'},
+    {s:'JetSMART — Seguimiento vía WhatsApp',p:'MEDIUM',f:'2026-04-17'},
+  ],
+  Fer:[
+    {s:'3V — Compartir prompt de copies a Mine',p:'MEDIUM',f:'2026-04-07'},
+    {s:'FER — Seguimiento a Manu: 3 artículos blog',p:'MEDIUM',f:'2026-04-08'},
+    {s:'PINTAANDO — Teléfono en línea + checar posteos Mine',p:'MEDIUM',f:'2026-04-08'},
+    {s:'AM — Arreglar láminas presentación general Amplemarket',p:'MEDIUM',f:'2026-04-09'},
+    {s:'STIL — Retroalimentar prompt Cloud + copies 2 meses más',p:'MEDIUM',f:'2026-04-09'},
+    {s:'IMMMU — Rediseñar Malbón: cambiar color',p:'MEDIUM',f:'2026-04-09'},
+    {s:'FER — Agendar entrevistas para ayuda a Mine',p:'MEDIUM',f:'2026-04-09'},
+    {s:'STIL 3V — Corregir y mejorar copies de 3 posteos',p:'HIGH',f:'2026-04-10'},
+    {s:'FER — Lineamientos gráficos presentaciones GR',p:'LOW',f:'2026-04-11'},
+    {s:'COMIR — Propuesta integral Marketing 360 + coordinar con Manu',p:'HIGH',f:'2026-04-13'},
+    {s:'AM_STIL SDR — Crear LinkedIn Julio + conectar a Amplemarket',p:'HIGH',f:'2026-04-13'},
+    {s:'GR INTERNO — Crear lineamientos gráficos para presentaciones',p:'HIGH',f:'2026-04-13'},
+    {s:'GR INTERNO — Contratar 5 licencias Claude Teams paquete básico',p:'HIGH',f:'2026-04-13'},
+    {s:'GR INTERNO — Arreglar láminas presentación general Amplemarket',p:'HIGH',f:'2026-04-13'},
+    {s:'STIL 3V — Retroalimentar y mejorar prompt Claude para copies',p:'HIGH',f:'2026-04-13'},
+    {s:'COMIR — Armar propuesta marketing 3V con deck revisado',p:'HIGH',f:'2026-04-13'},
+    {s:'GR INTERNO — Migrar a cuenta Claude Teams GR',p:'HIGH',f:'2026-04-13'},
+    {s:'PINTAANDO — Seguimiento a Manu sobre 3 artículos blog',p:'MEDIUM',f:'2026-04-13'},
+    {s:'STIL 3V — Crear parrilla de contenido Google Sheets + PDF',p:'HIGH',f:'2026-04-15'},
+    {s:'STIL 3V — Optimizar perfil LinkedIn director Héctor',p:'HIGH',f:'2026-04-15'},
+    {s:'STIL WEB — Revisar templates web provistos por Mike',p:'MEDIUM',f:'2026-04-15'},
+    {s:'STIL 3V — Subir Prompt Maestro v2 + copies LinkedIn pendientes',p:'HIGH',f:'2026-04-15'},
+    {s:'STIL — Dar de alta Estela y Hector Mendoza en redes',p:'MEDIUM',f:'2026-04-16'},
+    {s:'IMMMU — Investigar funcionalidades web de referencia',p:'MEDIUM',f:'2026-04-16'},
+    {s:'IMMMU — Preparar personajes + ciudad + research web',p:'HIGH',f:'2026-04-16'},
+    {s:'WB_IMMMU — Propuesta línea gráfica web personajes día/noche',p:'HIGH',f:'2026-04-17'},
+    {s:'Páginas Servicios — Contenido marketing',p:'MEDIUM',f:'2026-04-17'},
+    {s:'Pintaando — Corregir imágenes Charola + otras',p:'HIGH',f:'2026-04-17'},
+    {s:'GR INTERNO — Crear template base marketing 360 vA en Drive',p:'LOW',f:'2026-04-18'},
+    {s:'GR INTERNO — Organizar carpeta IMU en Drive',p:'LOW',f:'2026-04-18'},
+    {s:'IMMMU — Recibir y procesar materiales de María',p:'HIGH',f:'2026-04-09'},
+    {s:'GR INTERNO — Fco Losada: definir pricing reportes TW',p:'HIGH',f:'2026-04-09'},
+    {s:'GR INTERNO — Cambiar a cuenta Claude Teams',p:'HIGH',f:'2026-04-13'},
+  ],
+  Mine:[
+    {s:'STIL — Copies redes sociales esta semana',p:'HIGH',f:'2026-04-07'},
+    {s:'Lovable — Explorar opciones avanzadas de diseño',p:'MEDIUM',f:'2026-04-07'},
+    {s:'STIL — Proponer 3 estilos de diseño basados en benchmark',p:'HIGH',f:'2026-04-07'},
+    {s:'GR — Posteos Great Revenue esta semana',p:'HIGH',f:'2026-04-10'},
+    {s:'STIL — Posteos con línea gráfica nueva',p:'HIGH',f:'2026-04-10'},
+    {s:'MINE — Implementar prompt IA + artículo que Mike envió',p:'MEDIUM',f:'2026-04-10'},
+    {s:'STIL 3V — Rediseñar imágenes 3 posteos STIL',p:'HIGH',f:'2026-04-10'},
+    {s:'GR INTERNO — Implementar experimentación prompt IA',p:'MEDIUM',f:'2026-04-13'},
+    {s:'Páginas Servicios — Diseño gráfica/UX',p:'MEDIUM',f:'2026-04-17'},
+    {s:'Videos Pintaando — Actualizar/crear nuevos formatos',p:'MEDIUM',f:'2026-04-17'},
+    {s:'IMMMU — Entregar propuestas creativas: logo, personajes, ciudad',p:'HIGH',f:'2026-04-17'},
+  ],
+  Manu:[
+    {s:'MANU — 3 artículos blog',p:'MEDIUM',f:'2026-04-09'},
+    {s:'PINTAANDO — Conectar Claude con Google Ads vía MCP',p:'HIGH',f:'2026-04-11'},
+    {s:'PINTAANDO — Preparar análisis/reporte IMU',p:'HIGH',f:'2026-04-11'},
+    {s:'GR INTERNO — Manu investiga IMU',p:'MEDIUM',f:'2026-04-12'},
+    {s:'COMIR — Coordinarse con Fer para propuesta Marketing 360',p:'HIGH',f:'2026-04-13'},
+    {s:'COMIR — Investigación benchmarking web (Efecto Steve Jobs)',p:'MEDIUM',f:'2026-04-13'},
+    {s:'PINTAANDO — Analizar contenido Senir año pasado',p:'HIGH',f:'2026-04-13'},
+    {s:'PINTAANDO — Investigación comida y competencia',p:'HIGH',f:'2026-04-13'},
+    {s:'PINTAANDO — Conectar Claude con Google Ads',p:'HIGH',f:'2026-04-14'},
+    {s:'PINTAANDO — Estandarizar investigaciones — formato 15 puntos',p:'MEDIUM',f:'2026-04-15'},
+    {s:'COMIR — Investiga ideas COMIR+IMMMU sin costos',p:'LOW',f:'2026-04-16'},
+    {s:'Blog GR — Crear contenido estratégico',p:'HIGH',f:'2026-04-17'},
+    {s:'IMMMU — Entregar research funcionalidades web + menú de opciones',p:'HIGH',f:'2026-04-17'},
+    {s:'GR INTERNO — Estandarizar reportes competencia 15 puntos',p:'LOW',f:'2026-04-18'},
+  ],
+  Daniel:[
+    {s:'GR INTERNO — Onboarding: accesos HubSpot + Amplemarket + Claude Teams (Mike)',p:'HIGH',f:'2026-04-22'},
+    {s:'GR INTERNO — Revisar documentos de producto y portafolio GR (Daniel)',p:'HIGH',f:'2026-04-22'},
+    {s:'GR INTERNO — Primera sesión con Mike: estrategia AM y secuencias (Mike+Daniel)',p:'HIGH',f:'2026-04-22'},
+    {s:'GR INTERNO — Configurar perfil Amplemarket daniel@greatrevenue.com (Migue)',p:'HIGH',f:'2026-04-22'},
+  ],
+  Diseñadora:[
+    {s:'GR INTERNO — Onboarding: accesos Google Drive + Figma + Claude Teams (Fer)',p:'HIGH',f:'2026-04-22'},
+    {s:'GR INTERNO — Sesión con Mine: briefing proyectos activos STIL + IMMMU (Mine)',p:'HIGH',f:'2026-04-22'},
+    {s:'GR INTERNO — Revisar lineamientos gráficos GR + paleta de colores (Mine)',p:'MEDIUM',f:'2026-04-22'},
+  ],
+  Diana:[
+    {s:'PT_Gutiérrez Nájera 250 — Contactar a Lourdes Tarasena',p:'HIGH',f:'2026-03-24'},
+    {s:'PT_Antigua Piñona 44 — Dar seguimiento a Grupo Mitora',p:'HIGH',f:'2026-03-24'},
+    {s:'PT_Aguascalientes 147 — Contactar a Lourdes Tarasena',p:'HIGH',f:'2026-03-24'},
+    {s:'PT_Mitora — Galileo 104 Polanco — confirmar si oportunidad activa',p:'LOW',f:'2026-03-25'},
+    {s:'PT_Martín Mendalde 840 — Dar seguimiento a Mariana Ortiz',p:'MEDIUM',f:'2026-03-25'},
+    {s:'PT_López — Fernando de Alba — contactar Claudia López',p:'MEDIUM',f:'2026-03-25'},
+    {s:'PT_Porto Carrero — Dar seguimiento Bosques de las Minas',p:'MEDIUM',f:'2026-03-25'},
+    {s:'PT_San Jerónimo 122 — Dar seguimiento a Grupo Versa',p:'HIGH',f:'2026-03-25'},
+    {s:'PT_Corina 117 — Presentar cotización a Guillermo Rentería',p:'HIGH',f:'2026-03-25'},
+  ],
+};
+const PRI_COLOR={HIGH:'var(--rd)',MEDIUM:'var(--am)',LOW:'var(--gn)',NONE:'var(--tx3)'};
+const PRI_ORDER={HIGH:0,MEDIUM:1,LOW:2,NONE:3};
+const TODAY='2026-04-19';
+
+function initPendientes(){
+  const nav=document.getElementById('persona-tabs');
+  nav.innerHTML=PERSONAS.map(p=>{
+    const count=TAREAS[p]?.length||0;
+    const venc=(TAREAS[p]||[]).filter(t=>t.f<TODAY).length;
+    return`<button class="pbtn${p===personaActual?' active':''}" onclick="setPersona('${p}',this)">${p} <span style="font-size:8px;color:${venc>0?'var(--rd)':'var(--tx3)'}">(${count})</span></button>`;
+  }).join('');
+  renderTareas();
+}
+
+function setPersona(p,el){
+  personaActual=p;
+  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderTareas();
+}
+
+function setFiltro(f,el){
+  filtroActual=f;
+  // Solo desactivar botones de estado (no de producto)
+  el.closest('div').querySelectorAll('.pfbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderTareas();
+}
+function setProducto(p,el){
+  productoActual=p;
+  el.closest('div').querySelectorAll('.pfbtn').forEach(b=>b.classList.remove('active2'));
+  el.classList.add('active2');
+  renderTareas();
+}
+
+function renderTareas(){
+  const buscar=(document.getElementById('pbuscar')?.value||'').toLowerCase();
+  let tareas=[...(TAREAS[personaActual]||[])];
+  if(filtroActual==='vencidas') tareas=tareas.filter(t=>t.f<TODAY);
+  else if(filtroActual==='hoy') tareas=tareas.filter(t=>t.f===TODAY);
+  else if(filtroActual==='proximas') tareas=tareas.filter(t=>t.f>TODAY);
+  else if(filtroActual==='alta') tareas=tareas.filter(t=>t.p==='HIGH');
+  // Filtro por producto
+  if(productoActual!=='todos'){
+    if(productoActual==='INT') tareas=tareas.filter(t=>t.s.toUpperCase().includes('GR INTERNO')||t.s.toUpperCase().includes('INT '));
+    else if(productoActual==='PT') tareas=tareas.filter(t=>t.s.toUpperCase().includes('PT_')||t.s.toUpperCase().includes('PINTAANDO'));
+    else tareas=tareas.filter(t=>t.s.toUpperCase().includes(productoActual.toUpperCase()+'_')||t.s.toUpperCase().includes(productoActual.toUpperCase()+' ')||t.s.toUpperCase().startsWith(productoActual.toUpperCase()));
+  }
+  if(buscar) tareas=tareas.filter(t=>t.s.toLowerCase().includes(buscar));
+  tareas.sort((a,b)=>{
+    const av=a.f<TODAY?-1:0, bv=b.f<TODAY?-1:0;
+    if(av!==bv) return av-bv;
+    if(a.f!==b.f) return a.f<b.f?-1:1;
+    return PRI_ORDER[a.p]-PRI_ORDER[b.p];
+  });
+  const vencidas=tareas.filter(t=>t.f<TODAY);
+  const hoy=tareas.filter(t=>t.f===TODAY);
+  const proximas=tareas.filter(t=>t.f>TODAY);
+  let html='';
+  if(vencidas.length){
+    html+=`<div style="font-size:9px;letter-spacing:2px;color:var(--rd);margin-bottom:8px">🔴 VENCIDAS (${vencidas.length})</div>`;
+    html+=vencidas.map(t=>tareaHtml(t,true)).join('');
+  }
+  if(hoy.length){
+    html+=`<div style="font-size:9px;letter-spacing:2px;color:var(--am);margin-bottom:8px;margin-top:${vencidas.length?12:0}px">🟡 HOY (${hoy.length})</div>`;
+    html+=hoy.map(t=>tareaHtml(t,false)).join('');
+  }
+  if(proximas.length){
+    html+=`<div style="font-size:9px;letter-spacing:2px;color:var(--gn);margin-bottom:8px;margin-top:${vencidas.length||hoy.length?12:0}px">🟢 PRÓXIMAS (${proximas.length})</div>`;
+    html+=proximas.map(t=>tareaHtml(t,false)).join('');
+  }
+  if(!tareas.length) html='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:11px">Sin tareas con estos filtros</div>';
+  document.getElementById('tareas-list').innerHTML=html;
+  document.getElementById('tareas-count').textContent=`${tareas.length} tareas mostradas · ${vencidas.length} vencidas`;
+}
+
+function tareaHtml(t,venc){
+  const dd=Math.floor((new Date(t.f)-new Date(TODAY))/86400000);
+  const bc=venc?'rgba(240,62,93,0.15)':'var(--card)';
+  const border=venc?'border-color:rgba(240,62,93,0.3)':'';
+  const fechaColor=venc?'var(--rd)':dd===0?'var(--am)':dd<=3?'var(--am)':'var(--tx3)';
+  const fechaLabel=venc?`${Math.abs(dd)}d venc.`:dd===0?'HOY':dd+'d';
+  return`<div class="tarea-row" style="background:${bc};${border}">
+    <div class="tarea-pri" style="background:${PRI_COLOR[t.p]||'var(--tx3)'}"></div>
+    <div class="tarea-txt">${t.s}</div>
+    <div class="tarea-fecha" style="color:${fechaColor};font-weight:${venc||dd===0?700:400}">${fechaLabel}</div>
+  </div>`;
+}
+
+// ── ALERTAS ───────────────────────────────────────────────────────
+const ALERTAS=[
+  {nv:'C',area:'Renovación Won',titulo:'AM-Kio — VENCE 17 JUNIO',resp:'Migue',fecha:'2026-04-17',dias:'VENC',ctx:'Cliente Won activo con $10K/año de ingreso recurrente. La renovación ya venció el 17-abr. Contactar Aarón Cruz directamente para confirmar intención y proceso de compra. Sin acción inmediata el deal se pierde.'},
+  {nv:'C',area:'Renovación Won',titulo:'HS_UDG — VENCE 31 MAYO',resp:'Migue',fecha:'2026-05-31',dias:'42d',ctx:'Hootsuite UDG vence en 42 días. Proceso iniciado pero sin confirmación de Daniela y Miguel sobre uso y condiciones. Sin confirmación esta semana el proceso administrativo no alcanza.'},
+  {nv:'C',area:'Propuesta',titulo:'WB_STIL — CERRÓ 15-ABR',resp:'Migue',fecha:'2026-04-15',dias:'VENC',ctx:'Propuesta de página web + AEO enviada a Estela Escalante. Fecha límite 15-abr ya pasó. Llamar directamente. Es el primer producto WB que entraría con STIL — importante para ampliar la cuenta.'},
+  {nv:'C',area:'Facturación',titulo:'STIL — Facturas mar+abr sin emitir',resp:'Migue',fecha:'2026-04-19',dias:'HOY',ctx:'Dos facturas de Marketing 3V sin emitir para STIL (marzo y abril). STIL es cliente activo con 4 productos. No facturar a tiempo genera problemas de imagen y flujo de caja. Emitir HOY.'},
+  {nv:'C',area:'Facturación',titulo:'IMMMU — Factura abril 3V sin emitir',resp:'Migue',fecha:'2026-04-19',dias:'HOY',ctx:'Factura mensual de consultoría 3V para IMMMU no emitida. IMMMU tiene 4 productos simultáneos. Mantener la facturación al corriente es crítico para la relación.'},
+  {nv:'I',area:'Propuesta $100K',titulo:'GPV ITS — PROPUESTA ENVIADA',resp:'Mike+Migue',fecha:'2026-04-13',dias:'VENC',ctx:'Sesión de propuesta realizada con Ney Galicia el 13-abr. $100K en juego. Dar seguimiento: ¿cuándo responde? ¿necesita información adicional?'},
+  {nv:'I',area:'Deal $100K',titulo:'HITSS Perú — 2da REUNIÓN PENDIENTE',resp:'Mike+Migue',fecha:'2026-04-14',dias:'VENC',ctx:'Reunión técnica pendiente con Héctor Salazar y Robert Reyna. Preparar análisis ofimática + deck ITS para Perú. Briefing a Aldo (Roomie IT) para cobertura L1 de O365, AD y VPN.'},
+  {nv:'I',area:'Deal $100K',titulo:'PEPSICO — DEMO PENDIENTE',resp:'Migue',fecha:'2026-04-23',dias:'4d',ctx:'Demo ITS agendada para 23-abr con Sunil Kumar. Migue debe confirmar. Mike tiene pendiente enviar preguntas diagnóstico en inglés. PepsiCo tiene +50K empleados en LATAM.'},
+  {nv:'I',area:'Propuesta',titulo:'EX_IMMMU — REUNIÓN 18-ABR',resp:'Mike',fecha:'2026-04-18',dias:'VENC',ctx:'Búsqueda perfil vendedor B2B IMMMU. Confirmar con María Santoyo si sigue vigente. Deal pequeño ($1.8K) pero estratégico como expansión de cuenta IMMMU.'},
+  {nv:'I',area:'Propuesta',titulo:'AM_IMMMU — SIN RESPUESTA',resp:'Mike',fecha:'2026-04-16',dias:'VENC',ctx:'Propuesta de Amplemarket enviada a IMMMU. María Santoyo no ha respondido. Hacer seguimiento urgente. El plan compensación 12 meses tampoco tuvo respuesta.'},
+  {nv:'I',area:'Renovación Won',titulo:'AM_KONNEN — RENOVAR ANTES JUN',resp:'Migue',fecha:'2026-06-17',dias:'59d',ctx:'Renovación vence en septiembre pero el proceso debe iniciarse antes de junio. Javier Roldán es el contacto. Agendar junto con sesión de consultoría AM.'},
+  {nv:'O',area:'Prospección',titulo:'MARTHA — 120+ WAs Open+3 vencidos',resp:'Martha',fecha:'2026-04-13',dias:'VENC',ctx:'Batch masivo de WhatsApps a Open+3 del 7-abr. Open+3 convierte mejor que secuencias. Verificar cuáles se enviaron y actualizar CRM con resultado de cada contacto.'},
+  {nv:'O',area:'Deals Zombi',titulo:'5 DEALS ZOMBI — CERRAR O REACTIVAR',resp:'Mike',fecha:'2026-04-18',dias:'VENC',ctx:'TW Banco Finandina (close mar-2026), TW premium.com.sv (jun-2025), GenIA_Scania Peru, AM_Banco Covalto. Close dates vencidas. Están inflando el pipeline artificialmente.'},
+  {nv:'O',area:'Pintaando',titulo:'DIANA — 9 TAREAS PT_ VENCIDAS',resp:'Diana',fecha:'2026-04-13',dias:'VENC',ctx:'Todos los deals de Pintaando sin movimiento. Lourdes Tarasena (2 edif), Guillermo Rentería, Rodrigo Porto, Mariana Ortiz, Claudia López — contactos confirmados desde marzo sin seguimiento.'},
+  {nv:'O',area:'Entrega',titulo:'COMIR — PROPUESTA 3V+AM+WB',resp:'Fer+Manu',fecha:'2026-04-13',dias:'VENC',ctx:'COMIR tiene 3 deals activos: $45.2K total. Propuesta integral 3V+AM+WB presentada 13-abr. Reunión de seguimiento 22-abr — confirmar liga Meet con Migue.'},
+  {nv:'O',area:'Entrega AEO',titulo:'GOLDEN LION — PROPUESTA ENVIADA',resp:'Mike',fecha:'2026-04-17',dias:'VENC',ctx:'Propuesta AEO formal enviada por Mike a Bernardo Verdejo el 17-abr. Dar seguimiento: ¿cuándo responde? Uri tiene listo el diagnóstico AEO.'},
+  {nv:'O',area:'Entrega AEO',titulo:'FERRISARIATO — SESIÓN 16-ABR',resp:'Migue',fecha:'2026-04-16',dias:'VENC',ctx:'Sesión 16-abr con Corp El Rosado Ecuador. Valeria debe haber dado acceso web. Confirmar qué pasó en la sesión y próximos pasos.'},
+  {nv:'O',area:'Infraestructura',titulo:'CLAUDE TEAMS + WA BUSINESS',resp:'Fer+Migue',fecha:'2026-04-14',dias:'VENC',ctx:'Fer debe contratar 5 licencias Claude Teams y migrar desde su cuenta personal. Migue configura WhatsApp Business con imagen GR y proyecto corporativo en Claude Teams.'},
+];
+const NC={C:'var(--rd)',I:'var(--am)',O:'var(--bl)'};
+const NI={C:'🚨',I:'⚠️',O:'🔧'};
+const NL={C:'CRITICAS — actuar HOY',I:'IMPORTANTES — esta semana',O:'OPERATIVAS — no dejar pasar'};
+function renderAlertas(){
+  let html='';
+  ['C','I','O'].forEach(nv=>{
+    const col=NC[nv];
+    html+=`<div style="margin-bottom:22px"><div style="font-size:9px;letter-spacing:2px;color:${col};margin-bottom:10px">${NI[nv]} ${NL[nv]}</div>`;
+    ALERTAS.filter(a=>a.nv===nv).forEach((a,i)=>{
+      const cid=`ctx-${nv}-${i}`;
+      const dcolor=a.dias==='HOY'||a.dias==='VENC'?'var(--rd)':a.dias.includes('d')&&parseInt(a.dias)<=3?'var(--am)':'var(--tx3)';
+      html+=`<div class="alc" style="border:1px solid ${col}33" onclick="toggleCtx('${cid}',this)">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="flex:1">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+              <span style="font-size:8px;letter-spacing:1px;background:${col}22;color:${col};padding:2px 6px;border-radius:4px">${a.area}</span>
+              <span style="font-size:12px;font-weight:700;color:${nv==='C'?'#FFBBC8':nv==='I'?'#FFD580':'var(--tx)'}">${a.titulo}</span>
+            </div>
+            <div style="font-size:10px;color:var(--tx3)">👤 ${a.resp}</div>
+            <div id="${cid}" class="actx" style="border-left-color:${col}">${a.ctx}</div>
+            <div class="ahint">Toca para ver contexto →</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:9px;color:var(--tx3);margin-bottom:3px">${a.fecha}</div>
+            <div style="font-size:13px;font-weight:800;color:${dcolor}">${a.dias}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('alertas-list').innerHTML=html;
+}
+function toggleCtx(id,card){
+  const ctx=document.getElementById(id);
+  const open=ctx.classList.toggle('open');
+  card.querySelector('.ahint').style.display=open?'none':'block';
+}
+
+// ── AM ─────────────────────────────────────────────────────────────
+let amSubtab = 'meetings';
+function setAmSubtab(t, el) {
+  amSubtab = t;
+  document.querySelectorAll('.amtab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderAmSubtab();
+}
+
+const AM_MEETINGS = [
+  {co:'AdviceGroup GLOBAL', ct:'Mauricio Soto',  email:'msoto@advicegroup-global.com',  fecha:'15-abr', canal:'DuoCopilot', seq:'Posted about ITSM',                     prod:'ITS',  deal:'SÍ — deal creado'},
+  {co:'Golden Lion',        ct:'Bernardo Verdejo',email:'bverdejo@goldenlion.mx',         fecha:'17-abr', canal:'DuoCopilot', seq:'Changed jobs recently',                  prod:'AEO',  deal:'SÍ — AEO educación'},
+  {co:'Wella Company',      ct:'Arcelia Landa',   email:'arcelia.landa@wella.com',        fecha:'4-abr',  canal:'DuoCopilot', seq:'Engaged with post omnicanal',             prod:'TW',   deal:'SÍ — TW propuesta'},
+  {co:'Banco de Reservas',  ct:'Ivonne Cruz',     email:'icruz@banreservas.com',          fecha:'14-abr', canal:'Secuencia',  seq:'AEO+SEO BANKING LAT',                    prod:'AEO',  deal:'PENDIENTE'},
+  {co:'AARCO Seguros',      ct:'Mayte Román',     email:'mayte.roman@aarco.com.mx',       fecha:'13-abr', canal:'Secuencia',  seq:'AEO+SEO INSURANCE LAT',                  prod:'AEO',  deal:'PENDIENTE'},
+  {co:'PlanNet',            ct:'Daniel Villanueva',email:'dgvillanueva@plannet.com.mx',   fecha:'14-abr', canal:'Open+3 Migue',seq:'AM_19/01 al 24/02 Migue OPEN+3',        prod:'AM',   deal:'SÍ — AM propuesta'},
+];
+
+const REPLY_TAG = {
+  'interested':              {l:'Interested',       c:'#22C55E', pri:1},
+  'asked_to_circle_back_later':{l:'Circle Back',    c:'#F59E0B', pri:2},
+  'introduction':            {l:'Introduction',     c:'#3B82F6', pri:3},
+  'not_the_right_person':    {l:'Wrong Person',     c:'#94A3B8', pri:4},
+  'not_interested':          {l:'Not Interested',   c:'#F03E5D', pri:5},
+  'null':                    {l:'Sin etiqueta',      c:'#3D4655', pri:6},
+};
+
+const AM_REPLIES = [
+  {ct:'Beatriz Jordan',    co:'Banco Financiero Banrural', email:'beatriz.jordan@banrural.com.gt',      fecha:'6-abr',  tag:'interested',              prod:'AEO', accion:'Agendar demo AEO — URGENTE'},
+  {ct:'Mauricio Soto',     co:'AdviceGroup GLOBAL',        email:'msoto@advicegroup-global.com',         fecha:'10-abr', tag:'interested',              prod:'ITS', accion:'Deal creado — siguiente reunión'},
+  {ct:'Dayanara Harnisth', co:'TECNOAV',                   email:'dharnisth@tecnoav.com',                fecha:'13-abr', tag:'interested',              prod:'ITS', accion:'Contactar esta semana — HOT'},
+  {ct:'Álvaro Yáñez',      co:'Equipo FCAB',               email:'alvaro.yanez@fcab.cl',                 fecha:'16-abr', tag:'interested',              prod:'ITS', accion:'Reply reciente — contactar YA'},
+  {ct:'Vladimiro Rivera',  co:'Nuestro Diario',            email:'vladimiro.rivera@nuestrodiario.com.gt',fecha:'6-abr',  tag:'asked_to_circle_back_later',prod:'ITS',accion:'Deal ITS creado — seguimiento'},
+  {ct:'Eduardo Marcos',    co:'CrediScotia',               email:'eduardo.marcos@crediscotia.com.pe',    fecha:'16-abr', tag:'asked_to_circle_back_later',prod:'AEO',accion:'Agendar en 2 semanas'},
+  {ct:'Jorge Velasco',     co:'Microsoft',                 email:'jorgevelasco@microsoft.com',           fecha:'14-abr', tag:'null',                    prod:'LT',  accion:'Categorizar y dar seguimiento'},
+  {ct:'Jose Rodriguez',    co:'Mibanco',                   email:'jrodriguezm@credicorpcapital.com',     fecha:'6-abr',  tag:'not_the_right_person',    prod:'AEO', accion:'Buscar contacto correcto en empresa'},
+  {ct:'Carolina Carmona',  co:'Falabella',                 email:'ccarmona@falabella.cl',                fecha:'7-abr',  tag:'not_the_right_person',    prod:'ITS', accion:'Buscar contacto correcto en empresa'},
+  {ct:'Gueiby Guisselle',  co:'Grupo Ficohsa',             email:'gueiby.matamoros@ficohsa.com',         fecha:'7-abr',  tag:'not_the_right_person',    prod:'AEO', accion:'Buscar contacto correcto en empresa'},
+  {ct:'Marcos Westphalen', co:'Pinterest',                 email:'mwestphalen@pinterest.com',            fecha:'7-abr',  tag:'not_interested',          prod:'AM',  accion:'Cerrar — marcar Not Interested'},
+  {ct:'Eva Romero',        co:'BANCO GNB PERU',            email:'eva.romero@mi.com.co',                 fecha:'9-abr',  tag:'not_interested',          prod:'AEO', accion:'Cerrar — marcar Not Interested'},
+  {ct:'Gerardo Cano',      co:'True Solutions',            email:'gcp@tsccr.com',                        fecha:'10-abr', tag:'not_interested',          prod:'ITS', accion:'Cerrar — marcar Not Interested'},
+  {ct:'Marco Muñoz',       co:'Grupo Seligrat',            email:'marco.munoz@gruposeligrat.com',         fecha:'16-abr', tag:'not_interested',          prod:'ITS', accion:'Cerrar — marcar Not Interested'},
+];
+
+const AM_OPEN3 = [
+  {ct:'Cristian Henriquez', co:'Cencosud Scotiabank',     email:'cristian.henriquez@cencosud.cl',        opens:5, prod:'LT',  accion:'WA directo Martha — URGENTE'},
+  {ct:'Oliverio Chacon',    co:'Banco Finandina',         email:'oliverio.chacon@bancofinandina.com',     opens:5, prod:'LT',  accion:'WA directo Martha — deal zombi reactivar'},
+  {ct:'Diego Leon',         co:'Bancolombia',             email:'aleon@bancolombia.com.co',               opens:5, prod:'LT',  accion:'WA directo Martha — URGENTE'},
+  {ct:'Gustavo Granados',   co:'Herbalife',               email:'gustavogra@herbalife.com',               opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Daniel Volquez',     co:'DP World',                email:'daniel.volquez@dpworld.com',             opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Juan Zabala',        co:'Bancolombia',             email:'juzabala@bancolombia.com.co',            opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Moisés Navarro',     co:'Vertiv',                  email:'moises.navarro@vertiv.com',              opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Juan Aparicio',      co:'Grupo Unicomer',          email:'juan_aparicio@unicomer.com',             opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Pablo Clemente',     co:'Cencosud',                email:'martin.clemente@cencosud.com',           opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Juan Hernandez',     co:'Johnson Controls',        email:'juan.hernandez@adient.com',              opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Facundo Grana',      co:'Compass',                 email:'facundo.grana@compass.com',              opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Aaron Brito',        co:'Dräger',                  email:'aaron.brito@draeger.com',                opens:5, prod:'LT',  accion:'WA directo Martha'},
+  {ct:'Alejandra Escobar',  co:'Previsora Seguros',       email:'alejandra.escobar@previsora.gov.co',     opens:4, prod:'AEO', accion:'WA directo Martha'},
+  {ct:'Alejandra Carrasco', co:'Effy Jewelry',            email:'alejandra@effyjewelry.com',              opens:4, prod:'AEO', accion:'WA directo Martha'},
+  {ct:'Armando Peimbert',   co:'The Adecco',              email:'armando.peimbert@adeccogroup.com',       opens:4, prod:'ITS', accion:'WA directo Martha'},
+  {ct:'Antonio Valdiviezo', co:'Swissôtel Quito',         email:'antonio.valdiviezo@swissotel.com',       opens:4, prod:'AEO', accion:'WA directo Martha'},
+  {ct:'Andrés Villota',     co:'Banco Agrario Colombia',  email:'andres.munoz@bancoagrario.gov.co',       opens:4, prod:'AEO', accion:'WA directo Martha'},
+];
+
+function renderAmSubtab() {
+  const PC = {ITS:'#F03E5D',TW:'#3B82F6',AEO:'#00C9A7',GenIA:'#7B5FFF',AM:'#F59E0B','3V':'#E8409A',WB:'#22C55E',LT:'#A78BFA',Otro:'#94A3B8'};
+  const tag = (p) => { const c=PC[p]||'#94A3B8'; return \`<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:\${c}22;color:\${c}">\${p}</span>\`; };
+  const cont = document.getElementById('am-subtab-content');
+
+  if (amSubtab === 'meetings') {
+    const interested = AM_MEETINGS.filter(m => m.deal.includes('SÍ'));
+    const pendientes = AM_MEETINGS.filter(m => !m.deal.includes('SÍ'));
+    cont.innerHTML = \`
+      <div style="margin-bottom:16px">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--gn);margin-bottom:8px">✅ MEETINGS CON DEAL CREADO (\${interested.length})</div>
+        <div style="overflow:auto"><table>
+          <thead><tr><th>Contacto</th><th>Empresa</th><th>Fecha</th><th>Canal</th><th>Prod</th><th>Deal</th></tr></thead>
+          <tbody>\${interested.map(m => \`<tr>
+            <td style="font-weight:600">\${m.ct}</td>
+            <td>\${m.co}</td><td style="color:var(--cy)">\${m.fecha}</td>
+            <td><span style="font-size:9px;padding:2px 6px;border-radius:4px;background:\${m.canal==='DuoCopilot'?'rgba(123,95,255,0.15)':m.canal.includes('Open')? 'rgba(0,201,167,0.15)':'rgba(59,130,246,0.15)'};color:\${m.canal==='DuoCopilot'?'#7B5FFF':m.canal.includes('Open')?'#00C9A7':'#3B82F6'}">\${m.canal}</span></td>
+            <td>\${tag(m.prod)}</td>
+            <td style="color:var(--gn);font-size:10px">\${m.deal}</td>
+          </tr>\`).join('')}</tbody>
+        </table></div>
+      </div>
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:var(--am);margin-bottom:8px">⏳ PENDIENTES DE DEAL (\${pendientes.length})</div>
+        <div style="overflow:auto"><table>
+          <thead><tr><th>Contacto</th><th>Empresa</th><th>Fecha</th><th>Canal</th><th>Prod</th><th>Acción</th></tr></thead>
+          <tbody>\${pendientes.map(m => \`<tr>
+            <td style="font-weight:600">\${m.ct}</td>
+            <td>\${m.co}</td><td style="color:var(--cy)">\${m.fecha}</td>
+            <td><span style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(59,130,246,0.15);color:#3B82F6">\${m.canal}</span></td>
+            <td>\${tag(m.prod)}</td>
+            <td style="color:var(--am);font-size:10px">Crear deal + agendar</td>
+          </tr>\`).join('')}</tbody>
+        </table></div>
+      </div>
+    \`;
+  }
+
+  else if (amSubtab === 'replies') {
+    const sorted = [...AM_REPLIES].sort((a,b) => (REPLY_TAG[a.tag]?.pri||9)-(REPLY_TAG[b.tag]?.pri||9));
+    const grupos = {};
+    sorted.forEach(r => { const k=r.tag||'null'; if(!grupos[k])grupos[k]=[]; grupos[k].push(r); });
+    let html = '';
+    const orden = ['interested','asked_to_circle_back_later','introduction','null','not_the_right_person','not_interested'];
+    orden.forEach(key => {
+      if (!grupos[key]) return;
+      const info = REPLY_TAG[key] || {l:'Sin etiqueta',c:'#94A3B8'};
+      html += \`<div style="margin-bottom:16px">
+        <div style="font-size:9px;letter-spacing:2px;color:\${info.c};margin-bottom:8px">\${info.l.toUpperCase()} (\${grupos[key].length})</div>
+        <div style="overflow:auto"><table>
+          <thead><tr><th>Contacto</th><th>Empresa</th><th>Fecha</th><th>Prod</th><th>Acción</th></tr></thead>
+          <tbody>\${grupos[key].map(r => \`<tr>
+            <td><div style="font-weight:600">\${r.ct}</div><div style="font-size:9px;color:var(--tx3)">\${r.email}</div></td>
+            <td>\${r.co}</td><td style="color:var(--cy)">\${r.fecha}</td>
+            <td>\${tag(r.prod)}</td>
+            <td style="color:\${info.c};font-size:10px">\${r.accion}</td>
+          </tr>\`).join('')}
+          </tbody>
+        </table></div>
+      </div>\`;
+    });
+    cont.innerHTML = html;
+  }
+
+  else if (amSubtab === 'open3') {
+    cont.innerHTML = \`
+      <div style="padding:10px 14px;background:rgba(0,201,167,0.08);border:1px solid rgba(0,201,167,0.2);border-radius:10px;margin-bottom:14px;font-size:11px;color:var(--tx2)">
+        <strong style="color:var(--cy)">📊 \${AM_OPEN3.length} contactos Open+3 activos (últimos 15 días)</strong> — 
+        Todos han abierto el email 4+ veces sin responder. Canal más efectivo de conversión. <strong style="color:var(--cy)">Acción: WA directo Martha.</strong>
+      </div>
+      <div style="overflow:auto"><table>
+        <thead><tr><th>Contacto</th><th>Empresa</th><th>Opens</th><th>Prod</th><th>Email</th><th>Acción</th></tr></thead>
+        <tbody>\${AM_OPEN3.map(o => \`<tr>
+          <td style="font-weight:600">\${o.ct}</td>
+          <td>\${o.co}</td>
+          <td style="text-align:center"><span style="font-size:14px;font-weight:800;color:\${o.opens>=5?'var(--rd)':'var(--am)'}">🔥\${o.opens}</span></td>
+          <td>\${tag(o.prod)}</td>
+          <td style="font-size:9px;color:var(--tx3)">\${o.email}</td>
+          <td style="font-size:10px;color:var(--cy)">\${o.accion}</td>
+        </tr>\`).join('')}
+        </tbody>
+      </table></div>
+    \`;
+  }
+}
+
+function renderAM() {
+  document.getElementById('am-content').innerHTML = \`
+    <div style="background:rgba(123,95,255,0.06);border:1px solid rgba(123,95,255,0.2);border-radius:12px;padding:12px 16px;margin-bottom:16px">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--pu);margin-bottom:10px">3 CANALES DE GENERACIÓN — ÚLTIMOS 15 DÍAS (4-19 ABR 2026)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div style="background:var(--card);border-radius:8px;padding:10px 12px;border-left:3px solid var(--pu)">
+          <div style="font-size:11px;font-weight:700;color:var(--pu);margin-bottom:4px">🎯 DuoCopilot</div>
+          <div style="font-size:22px;font-weight:800;color:var(--pu);line-height:1">3</div>
+          <div style="font-size:9px;color:var(--tx3)">meetings · Wella, AdviceGroup, Golden Lion</div>
+        </div>
+        <div style="background:var(--card);border-radius:8px;padding:10px 12px;border-left:3px solid var(--bl)">
+          <div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:4px">📧 Secuencias</div>
+          <div style="font-size:22px;font-weight:800;color:var(--bl);line-height:1">2</div>
+          <div style="font-size:9px;color:var(--tx3)">meetings · Banco Reservas, AARCO</div>
+        </div>
+        <div style="background:var(--card);border-radius:8px;padding:10px 12px;border-left:3px solid var(--cy)">
+          <div style="font-size:11px;font-weight:700;color:var(--cy);margin-bottom:4px">📲 Open+3 Directo</div>
+          <div style="font-size:22px;font-weight:800;color:var(--cy);line-height:1">1</div>
+          <div style="font-size:9px;color:var(--tx3)">meeting · PlanNet (Daniel Villanueva)</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--tx3);margin-bottom:4px">MEETINGS 15D</div>
+        <div style="font-size:26px;font-weight:800;color:var(--gn)">6</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--tx3);margin-bottom:4px">REPLIES 15D</div>
+        <div style="font-size:26px;font-weight:800;color:var(--bl)">\${AM_REPLIES.length}</div>
+      </div>
+      <div style="background:var(--card);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--tx3);margin-bottom:4px">INTERESTED</div>
+        <div style="font-size:26px;font-weight:800;color:var(--gn)">\${AM_REPLIES.filter(r=>r.tag==='interested').length}</div>
+      </div>
+      <div style="background:var(--card);border:1px solid rgba(0,201,167,0.3);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--tx3);margin-bottom:4px">OPEN+3 ACTIVOS</div>
+        <div style="font-size:26px;font-weight:800;color:var(--cy)">\${AM_OPEN3.length}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0;margin-bottom:16px;background:var(--card2);border:1px solid var(--bdr);border-radius:10px;overflow:hidden">
+      <button class="amtab active" onclick="setAmSubtab('meetings',this)">📅 Meetings (6)</button>
+      <button class="amtab" onclick="setAmSubtab('replies',this)">💬 Replies (\${AM_REPLIES.length})</button>
+      <button class="amtab" onclick="setAmSubtab('open3',this)">🔥 Open+3 (\${AM_OPEN3.length})</button>
+    </div>
+    <div id="am-subtab-content"></div>
+  \`;
+  renderAmSubtab();
+}
+
+// ── FORECAST ──────────────────────────────────────────────────────
+function renderForecast(){
+  if(!DATA){
+    document.getElementById('fc-cons').textContent='—';
+    document.getElementById('fc-base').textContent='—';
+    document.getElementById('fc-opt').textContent='—';
+    document.getElementById('fc-closes').innerHTML='<div style="color:var(--tx3);font-size:11px">Actualiza para ver datos en vivo</div>';
+    return;
+  }
+  const {deals,kpis}=DATA;
+  const props=deals.filter(d=>d.stage==='presentationscheduled');
+  const educ=deals.filter(d=>d.stage==='qualifiedtobuy');
+  const atra=deals.filter(d=>d.stage==='appointmentscheduled');
+  const cons=props.reduce((s,d)=>s+d.amount*0.35,0);
+  const base=cons+educ.reduce((s,d)=>s+d.amount*0.20,0);
+  const opt=base+atra.reduce((s,d)=>s+d.amount*0.10,0)+deals.filter(d=>d.stage==='1332596064').reduce((s,d)=>s+d.amount*0.09,0);
+  document.getElementById('fc-cons').textContent=fmt(Math.round(cons));
+  document.getElementById('fc-base').textContent=fmt(Math.round(base));
+  document.getElementById('fc-opt').textContent=fmt(Math.round(opt));
+  const closes=deals.filter(d=>{
+    if(!d.closedate)return false;
+    const dd=Math.floor((new Date(d.closedate)-new Date('2026-04-19'))/86400000);
+    return dd>=0&&dd<=30;
+  }).sort((a,b)=>new Date(a.closedate)-new Date(b.closedate));
+  document.getElementById('fc-closes').innerHTML=closes.length===0?'<div style="color:var(--tx3);font-size:11px">Sin closes en los próximos 30 días</div>':closes.map(d=>{
+    const dd=Math.floor((new Date(d.closedate)-new Date('2026-04-19'))/86400000);
+    return`<div class="drow" style="border-color:${dd<=3?'rgba(240,62,93,0.3)':'var(--bdr)'}"><span>${dd===0?'🔥':dd<=7?'⚡':'📅'}</span><div class="dn">${d.name}</div>${tag(d.prod)}<span style="color:var(--cy);font-size:11px;font-weight:700">${fmt(d.amount)}</span><span style="font-size:13px;font-weight:800;color:${dd<=3?'var(--rd)':dd<=7?'var(--am)':'var(--tx3)'}">${dd===0?'HOY':dd+'d'}</span></div>`;
+  }).join('');
+}
+
+// ── ASISTENTE ─────────────────────────────────────────────────────
+const SYS=`Eres el AI Revenue Officer de Great Revenue (GR). 19 Abr 2026. Portal HubSpot 49671716.
+PIPELINE: ~$1.38M en 45 deals. FORECAST: ~$290K ponderado.
+WON URGENTES: AM-Kio (venció 17-abr — URGENTE), HS_UDG (vence 31-may).
+ALERTAS CRITICAS: AM-Kio vencida, HS_UDG vence, WB_STIL cerró 15-abr sin respuesta, STIL+IMMMU facturas sin emitir.
+MEETINGS SEMANA 7-13 ABR: HITS Peru, PepsiCo, IPT, Golden Lion, Casa Andina, Evertec, Chedraui, Scania Peru.
+DEALS NUEVOS SEMANA: 10 deals incluyendo AM_COMIR y WB_COMIR.
+AM: 15 secuencias 5706 leads 90d, 9 meetings sec, 17 meetings DuoCopilot. Martha 120+ WAs Open+3.
+PENDIENTES: Migue 97 tareas, Fer 32, Manu 14, Mine 11, Mike 19, Martha 6, Diana 9 (todas vencidas).
+CLIENTES MULTI-DEAL: STIL (4 prod $36.6K), IMMMU (4 prod $23.7K), CETES ($180K), GPV ($100K), Itera (AM+AEO), COMIR (3 deals $45.2K).
+EQUIPO: Mike (CEO), Migue (Ventas, owner 77808624), Martha (SDR, owner 82004391), Fer (Marketing), Mine (Diseño), Manu (Web), Diana (Pintaando), Daniel (Analista Inteligencia Digital & AM - entra 22-abr), Diseñadora (equipo Mine+Fer - por confirmar nombre).
+Responde en español, directo y conciso. Usa emojis para organizar.`;
+
+async function sendMsg(){
+  const inp=document.getElementById('cin');
+  const btn=document.getElementById('csend');
+  const txt=inp.value.trim();
+  if(!txt||btn.disabled)return;
+  inp.value='';btn.disabled=true;btn.textContent='...';
+  const container=document.getElementById('chat-msgs');
+  const u=document.createElement('div');u.className='msg mu';u.textContent=txt;container.appendChild(u);
+  chatMsgs.push({role:'user',content:txt});
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        system:DATA?SYS+'\n\nKPIs actuales HubSpot: '+JSON.stringify(DATA.kpis):SYS,
+        messages:chatMsgs.map(m=>({role:m.role,content:m.content}))})
+    });
+    const d=await res.json();
+    const reply=d.content?.[0]?.text||'Error al obtener respuesta.';
+    chatMsgs.push({role:'assistant',content:reply});
+    const a=document.createElement('div');a.className='msg ma';
+    a.innerHTML=`<div class="mlbl">ASISTENTE GR</div>${reply.replace(/\n/g,'<br>')}`;
+    container.appendChild(a);container.scrollTop=container.scrollHeight;
+  }catch(e){
+    const err=document.createElement('div');err.className='msg ma';err.textContent='Error: '+e.message;container.appendChild(err);
+  }
+  btn.disabled=false;btn.textContent='Enviar';
+}
+
+// ── RENDER DINÁMICO ───────────────────────────────────────────────
+function renderDynamic(){renderOverview();renderPipeline();renderForecast();}
+
+// ── INIT ──────────────────────────────────────────────────────────
+renderWon();
+renderClientes();
+renderAlertas();
+renderAM();
+initPendientes();
+// Cargar datos embebidos inmediatamente al abrir
+DATA = DATOS_EMBEBIDOS;
+renderDynamic();
+document.getElementById('last-upd').textContent = '📋 Datos 19-Abr (presiona Actualizar para live)';
+
+// Auto-refresh cada 15 min (descomenta para activar):
+// setInterval(loadData, 15*60*1000);
+</script>
+</body></html>
